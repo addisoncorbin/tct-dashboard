@@ -538,7 +538,7 @@ function ScoreboardPage({ deals, kpis, goals }) {
                         <tbody>
                             {[...agentData].sort((a, b) => b.volume - a.volume).map((ad, i) => (
                                 <tr key={ad.agent.name}>
-                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? 'ð¥' : i === 1 ? 'ð¥' : i === 2 ? 'ð¥' : i + 1}</td>
+                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? String.fromCodePoint(0x1F947) : i === 1 ? String.fromCodePoint(0x1F948) : i === 2 ? String.fromCodePoint(0x1F949) : i + 1}</td>
                                     <td style={{color: ad.agent.color, fontWeight:600}}>{ad.agent.name}</td>
                                     <td>{ad.closedDeals}</td>
                                     <td>${(ad.volume/1000).toFixed(0)}K</td>
@@ -751,11 +751,11 @@ function App() {
     if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
 
     const pages = [
-        { id: 'overview', label: 'Overview', icon: 'ð' },
-        { id: 'deals', label: 'Deals', icon: 'ð ' },
-        { id: 'scoreboard', label: 'Scoreboard', icon: 'ð' },
-        { id: 'tasks', label: 'Tasks', icon: 'â' },
-        { id: 'content', label: 'Content', icon: 'ð±' },
+        { id: 'overview', label: 'Overview', icon: String.fromCodePoint(0x1F4CA) },
+        { id: 'deals', label: 'Deals', icon: String.fromCodePoint(0x1F3E0) },
+        { id: 'scoreboard', label: 'Scoreboard', icon: String.fromCodePoint(0x1F3C6) },
+        { id: 'tasks', label: 'Tasks', icon: String.fromCodePoint(0x2705) },
+        { id: 'content', label: 'Content', icon: String.fromCodePoint(0x1F4F1) },
     ];
 
     const pendingTasks = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
