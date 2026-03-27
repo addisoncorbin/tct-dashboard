@@ -9,1558 +9,802 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: #0f1117;
-            color: #e2e8f0;
-            overflow: hidden;
-        }
-        .app-container {
-            display: flex;
-            height: 100vh;
-            gap: 0;
-        }
-        .sidebar {
-            width: 220px;
-            background: #1a1d27;
-            border-right: 1px solid #2a2d3a;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow-y: auto;
-            transition: width 0.3s ease;
-        }
-        .sidebar.collapsed {
-            width: 80px;
-        }
-        .sidebar-header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #2a2d3a;
-        }
-        .sidebar-logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: #6366f1;
-            margin-bottom: 4px;
-        }
-        .sidebar-subtitle {
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .sidebar.collapsed .sidebar-subtitle {
-            display: none;
-        }
-        .nav-items {
-            flex: 1;
-            margin-bottom: 20px;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            color: #94a3b8;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .nav-item:hover {
-            background: #22253a;
-            color: #e2e8f0;
-        }
-        .nav-item.active {
-            background: rgba(99, 102, 241, 0.15);
-            color: #6366f1;
-        }
-        .nav-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        .nav-label {
-            font-size: 14px;
-        }
-        .sidebar.collapsed .nav-label {
-            display: none;
-        }
-        .user-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #22253a;
-            border-radius: 8px;
-            border: 1px solid #2a2d3a;
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #6366f1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .user-info {
-            flex: 1;
-        }
-        .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-        .user-role {
-            font-size: 11px;
-            color: #64748b;
-        }
-        .sidebar.collapsed .user-info {
-            display: none;
-        }
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .page-header {
-            padding: 24px;
-            border-bottom: 1px solid #2a2d3a;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .page-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px;
-        }
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.2s ease;
-        }
-        .stat-card:hover {
-            background: #22253a;
-            border-color: #3a3d4a;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #e2e8f0;
-            margin-bottom: 8px;
-        }
-        .stat-subtext {
-            font-size: 12px;
-            color: #64748b;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #2a2d3a;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #6366f1, #818cf8);
-            transition: width 0.3s ease;
-        }
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #818cf8;
-        }
-        .btn-secondary {
-            background: #2a2d3a;
-            color: #e2e8f0;
-            border: 1px solid #3a3d4a;
-        }
-        .btn-secondary:hover {
-            background: #3a3d4a;
-        }
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        .btn-sm-danger {
-            background: #ef4444;
-            color: white;
-            padding: 4px 8px;
-            font-size: 11px;
-        }
-        .btn-sm-danger:hover {
-            background: #dc2626;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal {
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 24px;
-            position: relative;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #2a2d3a;
-        }
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-close:hover {
-            color: #e2e8f0;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 6px;
-        }
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            background: #0f1117;
-            border: 1px solid #2a2d3a;
-            border-radius: 6px;
-            color: #e2e8f0;
-            font-size: 13px;
-            font-family: inherit;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-        }
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #2a2d3a;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .badge-agent {
-            background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-        }
-        .badge-stage {
-            padding: 4px 10px;
-        }
-        .badge-prospect { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
-        .badge-listing { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-        .badge-contract { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
-        .badge-closed { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-        .badge-terminated { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-        .badge-priority-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-        .badge-priority-medium { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
-        .badge-priority-low { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-        .badge-content-ideas { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
-        .badge-content-week { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-        .badge-content-filming { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
-        .badge-content-ready { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
-        .badge-content-posted { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #1a1d27;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #2a2d3a;
-        }
-        .table th {
-            background: #22253a;
-            padding: 12px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #2a2d3a;
-        }
-        .table td {
-            padding: 12px;
-            border-bottom: 1px solid #2a2d3a;
-            font-size: 13px;
-        }
-        .table tbody tr:hover {
-            background: #22253a;
-        }
-        .table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .kanban-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 16px;
-        }
-        .kanban-column {
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 8px;
-            padding: 16px;
-            min-height: 500px;
-        }
-        .kanban-header {
-            font-size: 13px;
-            font-weight: 600;
-            color: #94a3b8;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .kanban-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .kanban-card {
-            background: #22253a;
-            border: 1px solid #2a2d3a;
-            border-radius: 6px;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .kanban-card:hover {
-            background: #2a2d3f;
-            border-color: #3a3d4a;
-        }
-        .kanban-card-title {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #e2e8f0;
-        }
-        .kanban-card-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: #64748b;
-        }
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #2a2d3a;
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .filter-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .filter-select {
-            padding: 8px 12px;
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 6px;
-            color: #e2e8f0;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .filter-select:hover {
-            border-color: #3a3d4a;
-        }
-        .agent-performance-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .agent-card {
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .agent-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .agent-card-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-        }
-        .agent-card-info h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .agent-card-info p {
-            font-size: 12px;
-            color: #64748b;
-        }
-        .agent-card-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .agent-stat {
-            background: #0f1117;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #2a2d3a;
-        }
-        .agent-stat-label {
-            font-size: 10px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .agent-stat-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #e2e8f0;
-        }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-        .kpi-box {
-            background: #0f1117;
-            padding: 16px;
-            border-radius: 6px;
-            border: 1px solid #2a2d3a;
-            text-align: center;
-        }
-        .kpi-box-label {
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .kpi-box-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e2e8f0;
-        }
-        .monthly-activity {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-        .monthly-card {
-            background: #1a1d27;
-            border: 1px solid #2a2d3a;
-            border-radius: 8px;
-            padding: 16px;
-        }
-        .monthly-card-header {
-            font-size: 13px;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 12px;
-        }
-        .monthly-stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2d3a;
-            font-size: 12px;
-        }
-        .monthly-stat-row:last-child {
-            border-bottom: none;
-        }
-        .monthly-stat-label {
-            color: #94a3b8;
-        }
-        .monthly-stat-value {
-            color: #e2e8f0;
-            font-weight: 600;
-        }
-        .overdue {
-            border-color: #ef4444 !important;
-            background: rgba(239, 68, 68, 0.05) !important;
-        }
-        .platform-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-        }
-        .content-stage-colors {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            margin-top: 8px;
-        }
-        .stage-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #0f1117; color: #e2e8f0; overflow: hidden; }
+        .app-container { display: flex; height: 100vh; }
+        .sidebar { width: 220px; background: #1a1d27; border-right: 1px solid #2a2d3a; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .sidebar-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #2a2d3a; }
+        .sidebar-logo { font-size: 22px; font-weight: bold; color: #6366f1; margin-bottom: 4px; }
+        .sidebar-subtitle { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-items { flex: 1; margin-bottom: 20px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; color: #94a3b8; transition: all 0.2s ease; white-space: nowrap; }
+        .nav-item:hover { background: #22253a; color: #e2e8f0; }
+        .nav-item.active { background: rgba(99,102,241,0.15); color: #6366f1; }
+        .nav-icon { font-size: 20px; flex-shrink: 0; }
+        .nav-label { font-size: 14px; }
+        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: #22253a; border-radius: 8px; border: 1px solid #2a2d3a; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #6366f1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+        .user-role { font-size: 11px; color: #64748b; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .page-header { padding: 24px; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; justify-content: space-between; }
+        .page-title { font-size: 24px; font-weight: 600; }
+        .page-content { flex: 1; overflow-y: auto; padding: 24px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 20px; transition: all 0.2s ease; }
+        .stat-card:hover { background: #22253a; border-color: #3a3d4a; }
+        .stat-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: bold; color: #e2e8f0; margin-bottom: 8px; }
+        .stat-subtext { font-size: 12px; color: #64748b; }
+        .progress-bar { width: 100%; height: 6px; background: #2a2d3a; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8); transition: width 0.3s ease; }
+        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #e2e8f0; }
+        .card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+        .agent-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+        .agent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .agent-name { font-size: 16px; font-weight: 600; }
+        .agent-goal { font-size: 13px; color: #94a3b8; }
+        .agent-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .agent-stat { text-align: center; }
+        .agent-stat-value { font-size: 18px; font-weight: bold; color: #e2e8f0; }
+        .agent-stat-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2a2d3a; background: #1a1d27; position: sticky; top: 0; }
+        td { padding: 12px; font-size: 13px; border-bottom: 1px solid #1e2130; }
+        tr:hover { background: rgba(99,102,241,0.05); }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .badge-yellow { background: rgba(234,179,8,0.15); color: #eab308; }
+        .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .badge-purple { background: rgba(168,85,247,0.15); color: #a855f7; }
+        .badge-gray { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: #6366f1; color: white; }
+        .btn-primary:hover { background: #5558e6; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        .btn-outline { background: transparent; border: 1px solid #2a2d3a; color: #e2e8f0; }
+        .btn-outline:hover { background: #22253a; }
+        .btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+        .btn-danger:hover { background: rgba(239,68,68,0.25); }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; background: #22253a; border: 1px solid #2a2d3a; border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #6366f1; }
+        .form-textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 12px; padding: 24px; width: 600px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { cursor: pointer; font-size: 20px; color: #94a3b8; background: none; border: none; }
+        .login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #0f1117; }
+        .login-box { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 16px; padding: 40px; width: 400px; text-align: center; }
+        .login-logo { font-size: 36px; font-weight: bold; color: #6366f1; margin-bottom: 8px; }
+        .login-sub { font-size: 14px; color: #64748b; margin-bottom: 30px; }
+        .pin-input { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; }
+        .pin-digit { width: 50px; height: 60px; background: #22253a; border: 2px solid #2a2d3a; border-radius: 10px; text-align: center; font-size: 24px; font-weight: bold; color: #e2e8f0; outline: none; }
+        .pin-digit:focus { border-color: #6366f1; }
+        .agent-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+        .agent-option { padding: 12px 8px; background: #22253a; border: 2px solid #2a2d3a; border-radius: 8px; cursor: pointer; text-align: center; font-size: 13px; color: #94a3b8; transition: all 0.2s; }
+        .agent-option:hover { border-color: #6366f1; color: #e2e8f0; }
+        .agent-option.selected { border-color: #6366f1; background: rgba(99,102,241,0.15); color: #6366f1; }
+        .ratio-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; }
+        .ratio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .ratio-item { text-align: center; padding: 12px; background: #22253a; border-radius: 8px; }
+        .ratio-value { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+        .ratio-label { font-size: 11px; color: #64748b; }
+        .trend-bar { display: flex; align-items: end; gap: 4px; height: 60px; margin-top: 12px; }
+        .trend-col { flex: 1; background: rgba(99,102,241,0.3); border-radius: 3px 3px 0 0; transition: height 0.3s; min-height: 4px; }
+        .trend-col.current { background: #6366f1; }
+        .notification-badge { background: #ef4444; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e2130; }
+        .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #6366f1; margin-top: 5px; flex-shrink: 0; }
+        .timeline-content { flex: 1; }
+        .timeline-date { font-size: 11px; color: #64748b; }
+        .timeline-text { font-size: 13px; color: #e2e8f0; margin-top: 2px; }
+        .coaching-tip { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 14px; margin-top: 12px; font-size: 13px; color: #c7d2fe; }
+        .coaching-tip strong { color: #a5b4fc; }
+        .empty-state { text-align: center; padding: 40px; color: #64748b; }
+        .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; background: #1a1d27; padding: 4px; border-radius: 8px; border: 1px solid #2a2d3a; }
+        .tab-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; color: #94a3b8; transition: all 0.2s; }
+        .tab-item.active { background: #6366f1; color: white; }
+        .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: transparent; border: 1px solid #2a2d3a; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+        .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
         @media (max-width: 768px) {
-            .sidebar {
-                width: 80px;
-            }
-            .sidebar-subtitle, .nav-label, .user-info {
-                display: none;
-            }
-            .stat-grid {
-                grid-template-columns: 1fr;
-            }
-            .kanban-container {
-                grid-template-columns: 1fr;
-            }
-            .agent-performance-grid {
-                grid-template-columns: 1fr;
-            }
+            .sidebar { width: 70px; padding: 12px; }
+            .nav-label, .sidebar-subtitle, .user-info { display: none; }
+            .stat-grid { grid-template-columns: 1fr 1fr; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
-        const { createClient } = window.supabase;
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo } = React;
 
-        const supabase = createClient(
-            'https://idmxupicsrmbujtrgdrf.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzI5MzAsImV4cCI6MjA5MDIwODkzMH0.0CKwkwS7gmaY8s60bG8ekPaBdFWXFocil8UCaiAa1go'
-        );
+// ─── Config ───
+const SUPABASE_URL = 'https://idmxupicsrmbujtrgdrf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQwOTYsImV4cCI6MjA5MDE0MDA5Nn0.Jkft1J6fxAXFaEjjucYmVJJgvnmHFmsBHTDfJAOk1WQ';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const AGENT_COLORS = {
-            'Addison': '#6366f1',
-            'Will': '#3b82f6',
-            'Ron': '#22c55e',
-            'Zach': '#f97316',
-            'Zayra': '#a855f7'
-        };
+const AGENTS = [
+    { name: 'Addison', fullName: 'Addison Corbin', role: 'Team Lead', pin: '1234', phone: '678-817-8167', fubId: 1, color: '#6366f1' },
+    { name: 'Will', fullName: 'William Nix', role: 'Agent', pin: '2345', phone: '4702576113', fubId: 3, color: '#3b82f6' },
+    { name: 'Ron', fullName: 'Ron Corbin', role: 'Agent', pin: '3456', phone: '7702941317', fubId: 9, color: '#22c55e' },
+    { name: 'Zach', fullName: 'Zach Joiner', role: 'Agent', pin: '4567', phone: '4788414010', fubId: 30, color: '#eab308' },
+    { name: 'Zayra', fullName: 'Zayra (Admin)', role: 'Admin', pin: '5678', phone: '6784720683', fubId: 35, color: '#a855f7' },
+];
 
-        const STAGE_COLORS = {
-            'Prospect': '#a855f7',
-            'Listing': '#3b82f6',
-            'Under Contract': '#eab308',
-            'Closed': '#22c55e',
-            'Terminated': '#ef4444'
-        };
+const STAGES = ['New Lead', 'Contacted', 'Showing', 'Under Contract', 'Pending', 'Closed', 'Lost'];
+const DEAL_SIDES = ['Buyer', 'Seller', 'Dual', 'Referral'];
 
-        const CONTENT_STAGES = ['Ideas', 'This Week', 'Filming', 'Ready to Post', 'Posted'];
-        const CONTENT_STAGE_COLORS = {
-            'Ideas': '#a855f7',
-            'This Week': '#3b82f6',
-            'Filming': '#eab308',
-            'Ready to Post': '#f97316',
-            'Posted': '#22c55e'
-        };
+// ─── Login Screen ───
+function LoginScreen({ onLogin }) {
+    const [selected, setSelected] = useState(null);
+    const [pin, setPin] = useState(['', '', '', '']);
+    const [error, setError] = useState('');
+    const refs = [React.createRef(), React.createRef(), React.createRef(), React.createRef()];
 
-        function formatCurrency(value) {
-            if (!value) return '$0';
-            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
-            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
-            return '$' + value.toLocaleString();
+    const handlePinChange = (idx, val) => {
+        if (val.length > 1) val = val.slice(-1);
+        if (val && !/^\d$/.test(val)) return;
+        const newPin = [...pin];
+        newPin[idx] = val;
+        setPin(newPin);
+        setError('');
+        if (val && idx < 3) refs[idx + 1].current?.focus();
+        if (newPin.every(d => d !== '')) {
+            const entered = newPin.join('');
+            const agent = AGENTS.find(a => a.name === selected);
+            if (agent && agent.pin === entered) {
+                onLogin(agent);
+            } else {
+                setError('Wrong PIN');
+                setTimeout(() => { setPin(['', '', '', '']); refs[0].current?.focus(); }, 500);
+            }
         }
+    };
 
-        function getInitials(name) {
-            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const handleKeyDown = (idx, e) => {
+        if (e.key === 'Backspace' && !pin[idx] && idx > 0) refs[idx - 1].current?.focus();
+    };
+
+    return (
+        <div className="login-screen">
+            <div className="login-box">
+                <div className="login-logo">TCT</div>
+                <div className="login-sub">Team Command Center</div>
+                {!selected ? (
+                    <>
+                        <div style={{fontSize:'14px',color:'#94a3b8',marginBottom:'16px'}}>Who's logging in?</div>
+                        <div className="agent-select">
+                            {AGENTS.map(a => (
+                                <div key={a.name} className="agent-option" onClick={() => { setSelected(a.name); setTimeout(() => refs[0].current?.focus(), 100); }}>
+                                    <div style={{fontSize:'24px',marginBottom:'4px'}}>{a.name[0]}</div>
+                                    <div>{a.name}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div style={{fontSize:'14px',color:'#94a3b8',marginBottom:'6px'}}>Enter PIN for</div>
+                        <div style={{fontSize:'20px',fontWeight:'bold',marginBottom:'20px',color:'#6366f1'}}>{selected}</div>
+                        <div className="pin-input">
+                            {pin.map((d, i) => (
+                                <input key={i} ref={refs[i]} className="pin-digit" type="password" maxLength="1" value={d}
+                                    onChange={e => handlePinChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} />
+                            ))}
+                        </div>
+                        {error && <div style={{color:'#ef4444',fontSize:'13px',marginBottom:'12px'}}>{error}</div>}
+                        <div style={{color:'#64748b',fontSize:'12px',cursor:'pointer'}} onClick={() => { setSelected(null); setPin(['','','','']); setError(''); }}>← Pick a different person</div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── Overview Page ───
+function OverviewPage({ deals, goals, kpis, currentUser }) {
+    const closedDeals = deals.filter(d => d.stage === 'Closed');
+    const activePipeline = deals.filter(d => d.stage !== 'Closed' && d.stage !== 'Lost');
+    const totalClosed = closedDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
+    const totalGCI = closedDeals.reduce((s, d) => s + (d.team_gross || 0), 0);
+    const teamGoal = goals.reduce((s, g) => s + (g.annual_goal || 0), 0);
+    const pctToGoal = teamGoal > 0 ? ((totalClosed / teamGoal) * 100).toFixed(1) : 0;
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const now = new Date();
+    const currentMonth = now.getMonth();
+
+    const monthlyClosings = months.map((m, i) => {
+        const mc = closedDeals.filter(d => {
+            const cd = new Date(d.close_date);
+            return cd.getMonth() === i && cd.getFullYear() === now.getFullYear();
+        });
+        return { month: m, count: mc.length, volume: mc.reduce((s, d) => s + (d.sale_price || 0), 0) };
+    });
+
+    return (
+        <>
+            <div className="stat-grid">
+                <div className="stat-card">
+                    <div className="stat-label">Closed Volume (YTD)</div>
+                    <div className="stat-value">${(totalClosed/1000000).toFixed(2)}M</div>
+                    <div className="stat-subtext">{pctToGoal}% to team goal</div>
+                    <div className="progress-bar"><div className="progress-fill" style={{width: Math.min(pctToGoal, 100) + '%'}}></div></div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Team GCI</div>
+                    <div className="stat-value">${(totalGCI/1000).toFixed(0)}K</div>
+                    <div className="stat-subtext">{closedDeals.length} deals closed</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Active Pipeline</div>
+                    <div className="stat-value">${(activePipeline.reduce((s,d) => s + (d.sale_price||0), 0)/1000000).toFixed(2)}M</div>
+                    <div className="stat-subtext">{activePipeline.length} deals in pipeline</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-label">Units Closed</div>
+                    <div className="stat-value">{closedDeals.length}</div>
+                    <div className="stat-subtext">Team goal: {goals.length} agents active</div>
+                </div>
+            </div>
+
+            <h3 className="section-title">Agent Performance (YTD)</h3>
+            {AGENTS.filter(a => a.role !== 'Admin').map(agent => {
+                const goal = goals.find(g => g.agent === agent.name);
+                const annualGoal = goal?.annual_goal || 0;
+                const agentDeals = closedDeals.filter(d => d.agent === agent.name);
+                const agentVol = agentDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
+                const pct = annualGoal > 0 ? ((agentVol / annualGoal) * 100).toFixed(0) : 0;
+                const gap = annualGoal - agentVol;
+                const agentKpis = kpis.filter(k => k.agent === agent.name && k.year === now.getFullYear());
+                const totalCalls = agentKpis.reduce((s, k) => s + (k.calls || 0), 0);
+
+                return (
+                    <div key={agent.name} className="agent-card">
+                        <div className="agent-header">
+                            <div>
+                                <h4 className="agent-name" style={{color: agent.color}}>{agent.name}</h4>
+                                <div className="agent-goal">Goal: ${(annualGoal/1000000).toFixed(1)}M</div>
+                            </div>
+                            <div style={{textAlign:'right'}}>
+                                <div style={{fontSize:'14px',fontWeight:'bold'}}>{pct}% to goal</div>
+                                <div style={{fontSize:'12px',color:'#64748b'}}>Gap: ${(gap/1000000).toFixed(1)}M</div>
+                            </div>
+                        </div>
+                        <div className="progress-bar" style={{marginBottom:'12px'}}><div className="progress-fill" style={{width: Math.min(pct, 100) + '%', background: agent.color}}></div></div>
+                        <div className="agent-stats">
+                            <div className="agent-stat"><div className="agent-stat-value">{agentDeals.length}</div><div className="agent-stat-label">Units</div></div>
+                            <div className="agent-stat"><div className="agent-stat-value">${(agentVol/1000).toFixed(0)}K</div><div className="agent-stat-label">Volume</div></div>
+                            <div className="agent-stat"><div className="agent-stat-value">{totalCalls}</div><div className="agent-stat-label">Calls</div></div>
+                            <div className="agent-stat"><div className="agent-stat-value">${(gap/1000000).toFixed(1)}M</div><div className="agent-stat-label">Gap</div></div>
+                        </div>
+                    </div>
+                );
+            })}
+
+            <h3 className="section-title" style={{marginTop:'24px'}}>Monthly Closings</h3>
+            <div className="card">
+                <div style={{display:'flex',gap:'8px',alignItems:'end',height:'120px'}}>
+                    {monthlyClosings.map((m, i) => {
+                        const maxVol = Math.max(...monthlyClosings.map(x => x.volume), 1);
+                        const h = (m.volume / maxVol) * 100;
+                        return (
+                            <div key={m.month} style={{flex:1,textAlign:'center'}}>
+                                <div style={{fontSize:'11px',color:'#e2e8f0',marginBottom:'4px'}}>{m.count > 0 ? m.count : ''}</div>
+                                <div style={{height: Math.max(h, 4) + 'px', background: i === currentMonth ? '#6366f1' : 'rgba(99,102,241,0.3)', borderRadius:'3px 3px 0 0', transition:'height 0.3s'}}></div>
+                                <div style={{fontSize:'10px',color:'#64748b',marginTop:'4px'}}>{m.month}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </>
+    );
+}
+
+// ─── Deals Page ───
+function DealsPage({ deals, setDeals, currentUser }) {
+    const [showModal, setShowModal] = useState(false);
+    const [editDeal, setEditDeal] = useState(null);
+    const [filter, setFilter] = useState('Active');
+    const [form, setForm] = useState({});
+
+    const filtered = filter === 'All' ? deals : filter === 'Active' ? deals.filter(d => d.stage !== 'Closed' && d.stage !== 'Lost') : deals.filter(d => d.stage === filter);
+
+    const openNew = () => { setForm({ agent: currentUser.name, side: 'Buyer', stage: 'New Lead', source: '' }); setEditDeal(null); setShowModal(true); };
+    const openEdit = (d) => { setForm({...d}); setEditDeal(d); setShowModal(true); };
+
+    const saveDeal = async () => {
+        const data = {
+            address: form.address || '', client: form.client || '', agent: form.agent || '', side: form.side || 'Buyer',
+            stage: form.stage || 'New Lead', sale_price: parseFloat(form.sale_price) || 0, gross_commission: parseFloat(form.gross_commission) || 0,
+            team_gross: parseFloat(form.team_gross) || 0, split: form.split || '', source: form.source || '', lender: form.lender || '',
+            binding_date: form.binding_date || null, close_date: form.close_date || null, due_diligence: form.due_diligence || null,
+            financing_contingency: form.financing_contingency || null, updated_at: new Date().toISOString()
+        };
+        if (editDeal) {
+            const { error } = await sb.from('deals').update(data).eq('id', editDeal.id);
+            if (!error) { setDeals(prev => prev.map(d => d.id === editDeal.id ? {...d, ...data} : d)); }
+        } else {
+            const { data: nd, error } = await sb.from('deals').insert(data).select();
+            if (!error && nd) setDeals(prev => [...prev, nd[0]]);
         }
+        setShowModal(false);
+    };
 
-        function Badge({ label, type = 'default', color }) {
-            const classMap = {
-                'prospect': 'badge-prospect',
-                'listing': 'badge-listing',
-                'contract': 'badge-contract',
-                'closed': 'badge-closed',
-                'terminated': 'badge-terminated',
-                'high': 'badge-priority-high',
-                'medium': 'badge-priority-medium',
-                'low': 'badge-priority-low',
-                'ideas': 'badge-content-ideas',
-                'week': 'badge-content-week',
-                'filming': 'badge-content-filming',
-                'ready': 'badge-content-ready',
-                'posted': 'badge-content-posted'
-            };
-            return <span className={`badge ${classMap[type] || 'badge-agent'}`}>{label}</span>;
-        }
+    const stageBadge = (stage) => {
+        const map = { 'Closed': 'badge-green', 'Under Contract': 'badge-blue', 'Pending': 'badge-yellow', 'Lost': 'badge-red', 'New Lead': 'badge-purple', 'Showing': 'badge-blue' };
+        return map[stage] || 'badge-gray';
+    };
 
-        function Modal({ isOpen, title, onClose, onSave, children, showSave = true }) {
-            if (!isOpen) return null;
-            return (
-                <div className="modal-overlay" onClick={onClose}>
+    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
+
+    return (
+        <>
+            <div style={{display:'flex',gap:'8px',marginBottom:'20px',flexWrap:'wrap',alignItems:'center'}}>
+                {['Active','All','Under Contract','Pending','Closed','Lost'].map(f => (
+                    <div key={f} className={`tab-item ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{f}</div>
+                ))}
+                <div style={{flex:1}}></div>
+                {isAdmin && <button className="btn btn-primary" onClick={openNew}>+ New Deal</button>}
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead><tr>
+                        <th>Address</th><th>Client</th><th>Agent</th><th>Side</th><th>Stage</th><th>Price</th><th>Close Date</th>
+                        {isAdmin && <th>Actions</th>}
+                    </tr></thead>
+                    <tbody>
+                        {filtered.map(d => (
+                            <tr key={d.id}>
+                                <td style={{fontWeight:500}}>{d.address}</td>
+                                <td>{d.client}</td>
+                                <td>{d.agent}</td>
+                                <td>{d.side}</td>
+                                <td><span className={`badge ${stageBadge(d.stage)}`}>{d.stage}</span></td>
+                                <td>${(d.sale_price || 0).toLocaleString()}</td>
+                                <td>{d.close_date || '—'}</td>
+                                {isAdmin && <td><button className="btn btn-sm btn-outline" onClick={() => openEdit(d)}>Edit</button></td>}
+                            </tr>
+                        ))}
+                        {filtered.length === 0 && <tr><td colSpan={isAdmin ? 8 : 7} className="empty-state">No deals found</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <div className="modal-title">{title}</div>
-                            <button className="modal-close" onClick={onClose}>×</button>
+                            <div className="modal-title">{editDeal ? 'Edit Deal' : 'New Deal'}</div>
+                            <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
                         </div>
-                        {children}
-                        {showSave && (
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                                <button className="btn btn-primary" onClick={onSave}>Save</button>
-                            </div>
-                        )}
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Address</label><input className="form-input" value={form.address||''} onChange={e => setForm({...form, address: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Client Name</label><input className="form-input" value={form.client||''} onChange={e => setForm({...form, client: e.target.value})} /></div>
+                        </div>
+                        <div className="form-row-3">
+                            <div className="form-group"><label className="form-label">Agent</label>
+                                <select className="form-select" value={form.agent||''} onChange={e => setForm({...form, agent: e.target.value})}>
+                                    {AGENTS.filter(a=>a.role!=='Admin').map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+                                </select></div>
+                            <div className="form-group"><label className="form-label">Side</label>
+                                <select className="form-select" value={form.side||'Buyer'} onChange={e => setForm({...form, side: e.target.value})}>
+                                    {DEAL_SIDES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select></div>
+                            <div className="form-group"><label className="form-label">Stage</label>
+                                <select className="form-select" value={form.stage||'New Lead'} onChange={e => setForm({...form, stage: e.target.value})}>
+                                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select></div>
+                        </div>
+                        <div className="form-row-3">
+                            <div className="form-group"><label className="form-label">Sale Price</label><input className="form-input" type="number" value={form.sale_price||''} onChange={e => setForm({...form, sale_price: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Gross Commission</label><input className="form-input" type="number" value={form.gross_commission||''} onChange={e => setForm({...form, gross_commission: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Team Gross</label><input className="form-input" type="number" value={form.team_gross||''} onChange={e => setForm({...form, team_gross: e.target.value})} /></div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Source</label><input className="form-input" value={form.source||''} onChange={e => setForm({...form, source: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Lender</label><input className="form-input" value={form.lender||''} onChange={e => setForm({...form, lender: e.target.value})} /></div>
+                        </div>
+                        <div style={{marginTop:'8px',marginBottom:'12px',fontWeight:600,color:'#94a3b8',fontSize:'12px',textTransform:'uppercase',letterSpacing:'0.5px'}}>Contract Dates</div>
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Binding Date</label><input className="form-input" type="date" value={form.binding_date||''} onChange={e => setForm({...form, binding_date: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Close Date</label><input className="form-input" type="date" value={form.close_date||''} onChange={e => setForm({...form, close_date: e.target.value})} /></div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Due Diligence End</label><input className="form-input" type="date" value={form.due_diligence||''} onChange={e => setForm({...form, due_diligence: e.target.value})} /></div>
+                            <div className="form-group"><label className="form-label">Financing Contingency</label><input className="form-input" type="date" value={form.financing_contingency||''} onChange={e => setForm({...form, financing_contingency: e.target.value})} /></div>
+                        </div>
+                        <div className="form-group"><label className="form-label">Split / Notes</label><input className="form-input" value={form.split||''} onChange={e => setForm({...form, split: e.target.value})} /></div>
+                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
+                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={saveDeal}>{editDeal ? 'Save Changes' : 'Create Deal'}</button>
+                        </div>
                     </div>
                 </div>
-            );
-        }
+            )}
+        </>
+    );
+}
 
-        function Overview({ deals, agentGoals, kpis, agents }) {
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth();
+// ─── Scoreboard Page ───
+function ScoreboardPage({ deals, kpis, goals }) {
+    const [view, setView] = useState('ratios');
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-            const closedDeals = deals.filter(d => d.stage === 'Closed');
-            const closedVolume = closedDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
-            const closedGCI = closedDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
+    const agentData = AGENTS.filter(a => a.role !== 'Admin').map(agent => {
+        const agentKpis = kpis.filter(k => k.agent === agent.name && k.year === currentYear);
+        const totalCalls = agentKpis.reduce((s, k) => s + (k.calls || 0), 0);
+        const totalAppts = agentKpis.reduce((s, k) => s + (k.appointments || 0), 0);
+        const totalContracts = agentKpis.reduce((s, k) => s + (k.contracts || 0), 0);
+        const totalListings = agentKpis.reduce((s, k) => s + (k.listings || 0), 0);
+        const agentDeals = deals.filter(d => d.agent === agent.name && d.stage === 'Closed');
+        const goal = goals.find(g => g.agent === agent.name)?.annual_goal || 0;
+        const volume = agentDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
 
-            const teamGoal = agentGoals.reduce((sum, ag) => sum + (ag.annual_goal || 0), 0);
-            const progressToGoal = teamGoal > 0 ? ((closedVolume / teamGoal) * 100).toFixed(1) : 0;
+        const callToContact = totalCalls > 0 ? ((totalAppts / totalCalls) * 100).toFixed(1) : '0.0';
+        const contactToAppt = totalAppts > 0 ? ((totalContracts / totalAppts) * 100).toFixed(1) : '0.0';
+        const apptToContract = totalContracts > 0 ? ((agentDeals.length / totalContracts) * 100).toFixed(1) : '0.0';
 
-            const activePipeline = deals.filter(d => ['Prospect', 'Listing', 'Under Contract'].includes(d.stage));
-            const activePipelineVolume = activePipeline.reduce((sum, d) => sum + (d.sale_price || 0), 0);
+        const monthlyData = months.map((m, i) => {
+            const mk = agentKpis.find(k => k.month === i + 1);
+            return { month: m, calls: mk?.calls || 0, appts: mk?.appointments || 0, contracts: mk?.contracts || 0 };
+        });
 
-            const monthlyClosings = {};
-            closedDeals.forEach(deal => {
-                if (deal.close_date) {
-                    const date = new Date(deal.close_date);
-                    const monthKey = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
-                    if (!monthlyClosings[monthKey]) monthlyClosings[monthKey] = { volume: 0, count: 0, deals: [] };
-                    monthlyClosings[monthKey].volume += deal.sale_price || 0;
-                    monthlyClosings[monthKey].count += 1;
-                    monthlyClosings[monthKey].deals.push(deal);
-                }
-            });
+        let coachTip = '';
+        if (parseFloat(callToContact) < 5) coachTip = `${agent.name}'s call-to-contact rate is low (${callToContact}%). Focus on call quality — scripts, timing, and tonality.`;
+        else if (parseFloat(contactToAppt) < 10) coachTip = `${agent.name} is making contacts but not enough appointments (${contactToAppt}%). Work on the appointment-setting pitch.`;
+        else if (totalContracts > 0 && agentDeals.length === 0) coachTip = `${agent.name} has contracts but no closings yet. Focus on getting deals to the finish line.`;
+        else if (agentDeals.length > 0) coachTip = `${agent.name} is converting well! Keep the momentum going.`;
 
-            return (
-                <div className="page-content">
-                    <div className="stat-grid">
-                        <div className="stat-card">
-                            <div className="stat-label">Closed Volume (YTD)</div>
-                            <div className="stat-value">{formatCurrency(closedVolume)}</div>
-                            <div className="stat-subtext">{progressToGoal}% to team goal</div>
-                            <div className="progress-bar">
-                                <div className="progress-fill" style={{ width: Math.min(progressToGoal, 100) + '%' }}></div>
-                            </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-label">Team GCI</div>
-                            <div className="stat-value">{formatCurrency(closedGCI)}</div>
-                            <div className="stat-subtext">{closedDeals.length} deals closed</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-label">Active Pipeline</div>
-                            <div className="stat-value">{activePipeline.length}</div>
-                            <div className="stat-subtext">{formatCurrency(activePipelineVolume)} in deals</div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-label">Team Size</div>
-                            <div className="stat-value">{agents.length}</div>
-                            <div className="stat-subtext">agents active</div>
-                        </div>
+        return { agent, totalCalls, totalAppts, totalContracts, totalListings, closedDeals: agentDeals.length, volume, goal, callToContact, contactToAppt, apptToContract, monthlyData, coachTip };
+    });
+
+    return (
+        <>
+            <div className="tab-bar">
+                <div className={`tab-item ${view === 'ratios' ? 'active' : ''}`} onClick={() => setView('ratios')}>Ratios & Coaching</div>
+                <div className={`tab-item ${view === 'trending' ? 'active' : ''}`} onClick={() => setView('trending')}>Monthly Trending</div>
+                <div className={`tab-item ${view === 'leaderboard' ? 'active' : ''}`} onClick={() => setView('leaderboard')}>Leaderboard</div>
+            </div>
+
+            {view === 'ratios' && agentData.map(ad => (
+                <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
+                        <h4 style={{color: ad.agent.color, fontSize:'16px'}}>{ad.agent.name}</h4>
+                        <div style={{fontSize:'13px',color:'#94a3b8'}}>Goal: ${(ad.goal/1000000).toFixed(1)}M | Volume: ${(ad.volume/1000).toFixed(0)}K</div>
                     </div>
+                    <div className="ratio-grid">
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#6366f1'}}>{ad.totalCalls}</div><div className="ratio-label">Calls</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#3b82f6'}}>{ad.totalAppts}</div><div className="ratio-label">Appts</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#22c55e'}}>{ad.totalContracts}</div><div className="ratio-label">Contracts</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#eab308'}}>{ad.closedDeals}</div><div className="ratio-label">Closed</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#a855f7'}}>{ad.callToContact}%</div><div className="ratio-label">Call→Contact</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#ec4899'}}>{ad.contactToAppt}%</div><div className="ratio-label">Contact→Appt</div></div>
+                    </div>
+                    {ad.coachTip && <div className="coaching-tip"><strong>Coaching:</strong> {ad.coachTip}</div>}
+                </div>
+            ))}
 
-                    <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>Agent Performance (YTD)</h3>
-                    <div className="agent-performance-grid">
-                        {agents.map(agent => {
-                            const goal = agentGoals.find(g => g.agent === agent)?.annual_goal || 0;
-                            const agentDeals = closedDeals.filter(d => d.agent === agent);
-                            const agentVolume = agentDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
-                            const agentGCI = agentDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
-                            const agentCalls = kpis.filter(k => k.agent === agent).reduce((sum, k) => sum + (k.calls || 0), 0);
-                            const gap = (goal - agentVolume).toFixed(0);
-                            const progress = goal > 0 ? ((agentVolume / goal) * 100).toFixed(0) : 0;
-
+            {view === 'trending' && agentData.map(ad => (
+                <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
+                    <h4 style={{color: ad.agent.color, marginBottom:'12px'}}>{ad.agent.name} — Monthly Calls</h4>
+                    <div style={{display:'flex',alignItems:'end',gap:'6px',height:'80px'}}>
+                        {ad.monthlyData.map((m, i) => {
+                            const max = Math.max(...ad.monthlyData.map(x => x.calls), 1);
+                            const h = (m.calls / max) * 100;
                             return (
-                                <div key={agent} className="agent-card">
-                                    <div className="agent-card-header">
-                                        <div className="agent-card-avatar" style={{ background: AGENT_COLORS[agent] }}>
-                                            {getInitials(agent)}
-                                        </div>
-                                        <div className="agent-card-info">
-                                            <h3>{agent}</h3>
-                                            <p>Goal: {formatCurrency(goal)}</p>
-                                        </div>
-                                    </div>
-                                    <div style={{ marginBottom: '12px' }}>
-                                        <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>
-                                            {formatCurrency(agentVolume)}
-                                        </div>
-                                        <div className="progress-bar">
-                                            <div className="progress-fill" style={{ width: Math.min(progress, 100) + '%', background: AGENT_COLORS[agent] }}></div>
-                                        </div>
-                                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                                            {progress}% to goal
-                                        </div>
-                                    </div>
-                                    <div className="agent-card-stats">
-                                        <div className="agent-stat">
-                                            <div className="agent-stat-label">Units</div>
-                                            <div className="agent-stat-value">{agentDeals.length}</div>
-                                        </div>
-                                        <div className="agent-stat">
-                                            <div className="agent-stat-label">Calls</div>
-                                            <div className="agent-stat-value">{agentCalls}</div>
-                                        </div>
-                                        <div className="agent-stat">
-                                            <div className="agent-stat-label">Gap</div>
-                                            <div className="agent-stat-value" style={{ color: gap > 0 ? '#ef4444' : '#22c55e' }}>
-                                                {formatCurrency(Math.abs(gap))}
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div key={m.month} style={{flex:1,textAlign:'center'}}>
+                                    <div style={{fontSize:'10px',color:'#e2e8f0',marginBottom:'2px'}}>{m.calls > 0 ? m.calls : ''}</div>
+                                    <div style={{height: Math.max(h, 4) + 'px', background: i + 1 === currentMonth ? ad.agent.color : 'rgba(99,102,241,0.2)', borderRadius:'3px 3px 0 0'}}></div>
+                                    <div style={{fontSize:'9px',color:'#64748b',marginTop:'2px'}}>{m.month}</div>
                                 </div>
                             );
                         })}
                     </div>
-
-                    <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>Monthly Closings</h3>
-                    <div className="monthly-activity">
-                        {Object.entries(monthlyClosings).sort((a, b) => new Date(b[0]) - new Date(a[0])).map(([month, data]) => (
-                            <div key={month} className="monthly-card">
-                                <div className="monthly-card-header">{month}</div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Volume</span>
-                                    <span className="monthly-stat-value">{formatCurrency(data.volume)}</span>
+                    <div style={{display:'flex',gap:'6px',height:'60px',alignItems:'end',marginTop:'16px'}}>
+                        {ad.monthlyData.map((m, i) => {
+                            const max = Math.max(...ad.monthlyData.map(x => x.appts), 1);
+                            const h = (m.appts / max) * 100;
+                            return (
+                                <div key={m.month + 'a'} style={{flex:1,textAlign:'center'}}>
+                                    <div style={{fontSize:'10px',color:'#e2e8f0',marginBottom:'2px'}}>{m.appts > 0 ? m.appts : ''}</div>
+                                    <div style={{height: Math.max(h, 4) + 'px', background: i + 1 === currentMonth ? '#22c55e' : 'rgba(34,197,94,0.2)', borderRadius:'3px 3px 0 0'}}></div>
+                                    <div style={{fontSize:'9px',color:'#64748b',marginTop:'2px'}}>{m.month}</div>
                                 </div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Units</span>
-                                    <span className="monthly-stat-value">{data.count}</span>
-                                </div>
-                                {data.deals.slice(0, 3).map((deal, i) => (
-                                    <div key={i} style={{ fontSize: '11px', color: '#64748b', paddingTop: '8px', borderTop: '1px solid #2a2d3a' }}>
-                                        {deal.address?.substring(0, 30)}... - {formatCurrency(deal.sale_price)}
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
+                    <div style={{fontSize:'11px',color:'#64748b',marginTop:'8px'}}>Top: Calls | Bottom: Appointments</div>
                 </div>
-            );
-        }
+            ))}
 
-        function Deals({ deals, setDeals, agents }) {
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [editingDeal, setEditingDeal] = useState(null);
-            const [filterStage, setFilterStage] = useState('All');
-            const [filterAgent, setFilterAgent] = useState('All');
-            const [formData, setFormData] = useState({
-                address: '', client: '', agent: '', side: 'Buy', stage: 'Prospect',
-                sale_price: '', gross_commission: '', team_gross: '', split: '',
-                source: '', lender: '', binding_date: '', close_date: '', due_diligence: '', financing_contingency: ''
-            });
-
-            const stages = ['Prospect', 'Listing', 'Under Contract', 'Closed', 'Terminated'];
-            const sides = ['Buy', 'Sell', 'Both'];
-
-            const openModal = (deal = null) => {
-                if (deal) {
-                    setEditingDeal(deal);
-                    setFormData(deal);
-                } else {
-                    setEditingDeal(null);
-                    setFormData({
-                        address: '', client: '', agent: '', side: 'Buy', stage: 'Prospect',
-                        sale_price: '', gross_commission: '', team_gross: '', split: '',
-                        source: '', lender: '', binding_date: '', close_date: '', due_diligence: '', financing_contingency: ''
-                    });
-                }
-                setIsModalOpen(true);
-            };
-
-            const saveDeal = async () => {
-                try {
-                    if (editingDeal) {
-                        await supabase.from('deals').update(formData).eq('id', editingDeal.id);
-                    } else {
-                        await supabase.from('deals').insert([formData]);
-                    }
-                    const { data } = await supabase.from('deals').select('*').order('created_at', { ascending: false });
-                    setDeals(data);
-                    setIsModalOpen(false);
-                } catch (error) {
-                    console.error('Error saving deal:', error);
-                }
-            };
-
-            const deleteDeal = async (id) => {
-                try {
-                    await supabase.from('deals').delete().eq('id', id);
-                    setDeals(deals.filter(d => d.id !== id));
-                } catch (error) {
-                    console.error('Error deleting deal:', error);
-                }
-            };
-
-            const filtered = deals.filter(d => {
-                if (filterStage !== 'All' && d.stage !== filterStage) return false;
-                if (filterAgent !== 'All' && d.agent !== filterAgent) return false;
-                return true;
-            });
-
-            const stageCounts = {};
-            const stageVolumes = {};
-            stages.forEach(s => {
-                stageCounts[s] = deals.filter(d => d.stage === s).length;
-                stageVolumes[s] = deals.filter(d => d.stage === s).reduce((sum, d) => sum + (d.sale_price || 0), 0);
-            });
-
-            return (
-                <div className="page-content">
-                    <div className="stat-grid">
-                        {stages.map(stage => (
-                            <div key={stage} className="stat-card" onClick={() => setFilterStage(stage)} style={{ cursor: 'pointer' }}>
-                                <div className="stat-label">{stage}</div>
-                                <div className="stat-value">{stageCounts[stage]}</div>
-                                <div className="stat-subtext">{formatCurrency(stageVolumes[stage])}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="filter-row">
-                        <select className="filter-select" value={filterStage} onChange={e => setFilterStage(e.target.value)}>
-                            <option value="All">All Stages</option>
-                            {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        <select className="filter-select" value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
-                            <option value="All">All Agents</option>
-                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
-                        <button className="btn btn-primary btn-small" onClick={() => openModal()}>+ Add Deal</button>
-                    </div>
-
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Address</th>
-                                <th>Client</th>
-                                <th>Agent</th>
-                                <th>Side</th>
-                                <th>Stage</th>
-                                <th>Sale Price</th>
-                                <th>GCI</th>
-                                <th>Team Gross</th>
-                                <th>Source</th>
-                                <th>Close Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+            {view === 'leaderboard' && (
+                <div className="card">
+                    <table>
+                        <thead><tr><th>Rank</th><th>Agent</th><th>Closed</th><th>Volume</th><th>Calls</th><th>Appts</th><th>% to Goal</th></tr></thead>
                         <tbody>
-                            {filtered.map(deal => (
-                                <tr key={deal.id}>
-                                    <td>{deal.address}</td>
-                                    <td>{deal.client}</td>
-                                    <td><Badge label={deal.agent} type="agent" color={AGENT_COLORS[deal.agent]} /></td>
-                                    <td>{deal.side}</td>
-                                    <td><Badge label={deal.stage} type={deal.stage.toLowerCase().replace(' ', '')} /></td>
-                                    <td>{formatCurrency(deal.sale_price)}</td>
-                                    <td>{formatCurrency(deal.gross_commission)}</td>
-                                    <td>{formatCurrency(deal.team_gross)}</td>
-                                    <td>{deal.source}</td>
-                                    <td>{deal.close_date ? new Date(deal.close_date).toLocaleDateString() : '-'}</td>
-                                    <td>
-                                        <button className="btn btn-secondary btn-small" onClick={() => openModal(deal)}>Edit</button>
-                                        <button className="btn btn-sm-danger" onClick={() => deleteDeal(deal.id)}>Delete</button>
-                                    </td>
+                            {[...agentData].sort((a, b) => b.volume - a.volume).map((ad, i) => (
+                                <tr key={ad.agent.name}>
+                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+                                    <td style={{color: ad.agent.color, fontWeight:600}}>{ad.agent.name}</td>
+                                    <td>{ad.closedDeals}</td>
+                                    <td>${(ad.volume/1000).toFixed(0)}K</td>
+                                    <td>{ad.totalCalls}</td>
+                                    <td>{ad.totalAppts}</td>
+                                    <td>{ad.goal > 0 ? ((ad.volume / ad.goal) * 100).toFixed(0) + '%' : '—'}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-
-                    <Modal isOpen={isModalOpen} title={editingDeal ? 'Edit Deal' : 'Add Deal'} onClose={() => setIsModalOpen(false)} onSave={saveDeal}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div className="form-group">
-                                <label className="form-label">Address</label>
-                                <input className="form-input" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Client</label>
-                                <input className="form-input" value={formData.client} onChange={e => setFormData({...formData, client: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Agent</label>
-                                <select className="form-select" value={formData.agent} onChange={e => setFormData({...formData, agent: e.target.value})}>
-                                    <option value="">Select Agent</option>
-                                    {agents.map(a => <option key={a} value={a}>{a}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Side</label>
-                                <select className="form-select" value={formData.side} onChange={e => setFormData({...formData, side: e.target.value})}>
-                                    {sides.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Stage</label>
-                                <select className="form-select" value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
-                                    {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Sale Price</label>
-                                <input className="form-input" type="number" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: parseFloat(e.target.value) || 0})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Gross Commission</label>
-                                <input className="form-input" type="number" value={formData.gross_commission} onChange={e => setFormData({...formData, gross_commission: parseFloat(e.target.value) || 0})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Team Gross</label>
-                                <input className="form-input" type="number" value={formData.team_gross} onChange={e => setFormData({...formData, team_gross: parseFloat(e.target.value) || 0})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Split %</label>
-                                <input className="form-input" type="number" value={formData.split} onChange={e => setFormData({...formData, split: parseFloat(e.target.value) || 0})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Source</label>
-                                <input className="form-input" value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Lender</label>
-                                <input className="form-input" value={formData.lender} onChange={e => setFormData({...formData, lender: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Close Date</label>
-                                <input className="form-input" type="date" value={formData.close_date} onChange={e => setFormData({...formData, close_date: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Binding Date</label>
-                                <input className="form-input" type="date" value={formData.binding_date} onChange={e => setFormData({...formData, binding_date: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Due Diligence</label>
-                                <input className="form-input" type="date" value={formData.due_diligence} onChange={e => setFormData({...formData, due_diligence: e.target.value})} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Financing Contingency</label>
-                                <input className="form-input" type="date" value={formData.financing_contingency} onChange={e => setFormData({...formData, financing_contingency: e.target.value})} />
-                            </div>
-                        </div>
-                    </Modal>
                 </div>
-            );
-        }
+            )}
+        </>
+    );
+}
 
-        function Scoreboard({ kpis, setKpis, agents, deals, agentGoals }) {
-            const [selectedAgent, setSelectedAgent] = useState(agents[0] || '');
-            const [isLogModalOpen, setIsLogModalOpen] = useState(false);
-            const [logData, setLogData] = useState({
-                month: new Date().getMonth() + 1,
-                calls: 0,
-                appointments: 0,
-                contracts: 0,
-                listings: 0
-            });
+// ─── Tasks Page ───
+function TasksPage({ tasks, setTasks, currentUser }) {
+    const [showModal, setShowModal] = useState(false);
+    const [form, setForm] = useState({});
+    const [filter, setFilter] = useState('mine');
+    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
 
-            const currentYear = new Date().getFullYear();
+    const filtered = filter === 'all' ? tasks : filter === 'mine' ? tasks.filter(t => t.assignee === currentUser.name || t.assignee === currentUser.fullName) : tasks.filter(t => t.status === filter);
 
-            const logActivity = async () => {
-                try {
-                    await supabase.from('kpis').upsert({
-                        agent: selectedAgent,
-                        month: logData.month,
-                        year: currentYear,
-                        calls: logData.calls,
-                        appointments: logData.appointments,
-                        contracts: logData.contracts,
-                        listings: logData.listings
-                    }, { onConflict: 'agent,month,year' });
-                    const { data } = await supabase.from('kpis').select('*');
-                    setKpis(data);
-                    setIsLogModalOpen(false);
-                    setLogData({ month: new Date().getMonth() + 1, calls: 0, appointments: 0, contracts: 0, listings: 0 });
-                } catch (error) {
-                    console.error('Error logging activity:', error);
-                }
-            };
-
-            const agentYTDKpis = kpis.filter(k => k.agent === selectedAgent && k.year === currentYear);
-            const agentCalls = agentYTDKpis.reduce((sum, k) => sum + (k.calls || 0), 0);
-            const agentAppointments = agentYTDKpis.reduce((sum, k) => sum + (k.appointments || 0), 0);
-            const agentContracts = agentYTDKpis.reduce((sum, k) => sum + (k.contracts || 0), 0);
-            const agentListings = agentYTDKpis.reduce((sum, k) => sum + (k.listings || 0), 0);
-
-            const agentDeals = deals.filter(d => d.agent === selectedAgent && d.stage === 'Closed');
-            const agentGCI = agentDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
-            const agentActive = deals.filter(d => d.agent === selectedAgent && ['Prospect', 'Listing', 'Under Contract'].includes(d.stage));
-
-            const goal = agentGoals.find(g => g.agent === selectedAgent)?.annual_goal || 0;
-            const agentVolume = agentDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
-            const gapToGoal = goal - agentVolume;
-
-            const monthlyBreakdown = {};
-            agentYTDKpis.forEach(k => {
-                const monthName = new Date(2026, k.month - 1).toLocaleString('en-US', { month: 'short' });
-                monthlyBreakdown[monthName] = {
-                    calls: k.calls || 0,
-                    appointments: k.appointments || 0,
-                    contracts: k.contracts || 0,
-                    listings: k.listings || 0
-                };
-            });
-
-            return (
-                <div className="page-content">
-                    <div className="filter-row">
-                        <select className="filter-select" value={selectedAgent} onChange={e => setSelectedAgent(e.target.value)}>
-                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
-                        <button className="btn btn-primary btn-small" onClick={() => setIsLogModalOpen(true)}>Log Activity</button>
-                    </div>
-
-                    <div className="agent-card" style={{ marginBottom: '24px' }}>
-                        <div className="agent-card-header">
-                            <div className="agent-card-avatar" style={{ background: AGENT_COLORS[selectedAgent] }}>
-                                {getInitials(selectedAgent)}
-                            </div>
-                            <div className="agent-card-info">
-                                <h3>{selectedAgent}</h3>
-                                <p>Annual Goal: {formatCurrency(goal)}</p>
-                            </div>
-                        </div>
-                        <div style={{ marginBottom: '16px' }}>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
-                                {formatCurrency(agentVolume)}
-                            </div>
-                            <div className="progress-bar">
-                                <div className="progress-fill" style={{ width: Math.min((agentVolume / goal) * 100, 100) + '%', background: AGENT_COLORS[selectedAgent] }}></div>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
-                                <span>{((agentVolume / goal) * 100).toFixed(0)}% to goal</span>
-                                <span style={{ color: gapToGoal > 0 ? '#ef4444' : '#22c55e' }}>Gap: {formatCurrency(Math.abs(gapToGoal))}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>YTD Performance</h3>
-                    <div className="kpi-grid">
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">Units Closed</div>
-                            <div className="kpi-box-value">{agentDeals.length}</div>
-                        </div>
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">GCI Earned</div>
-                            <div className="kpi-box-value">{formatCurrency(agentGCI)}</div>
-                        </div>
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">Active Deals</div>
-                            <div className="kpi-box-value">{agentActive.length}</div>
-                        </div>
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">Calls YTD</div>
-                            <div className="kpi-box-value">{agentCalls}</div>
-                        </div>
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">Appointments</div>
-                            <div className="kpi-box-value">{agentAppointments}</div>
-                        </div>
-                        <div className="kpi-box">
-                            <div className="kpi-box-label">Contracts</div>
-                            <div className="kpi-box-value">{agentContracts}</div>
-                        </div>
-                    </div>
-
-                    <h3 style={{ marginBottom: '12px', marginTop: '24px', fontSize: '14px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Monthly Breakdown</h3>
-                    <div className="monthly-activity">
-                        {Object.entries(monthlyBreakdown).map(([month, stats]) => (
-                            <div key={month} className="monthly-card">
-                                <div className="monthly-card-header">{month}</div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Calls</span>
-                                    <span className="monthly-stat-value">{stats.calls}</span>
-                                </div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Appointments</span>
-                                    <span className="monthly-stat-value">{stats.appointments}</span>
-                                </div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Contracts</span>
-                                    <span className="monthly-stat-value">{stats.contracts}</span>
-                                </div>
-                                <div className="monthly-stat-row">
-                                    <span className="monthly-stat-label">Listings</span>
-                                    <span className="monthly-stat-value">{stats.listings}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <Modal isOpen={isLogModalOpen} title="Log Activity" onClose={() => setIsLogModalOpen(false)} onSave={logActivity}>
-                        <div className="form-group">
-                            <label className="form-label">Month</label>
-                            <select className="form-select" value={logData.month} onChange={e => setLogData({...logData, month: parseInt(e.target.value)})}>
-                                {Array.from({ length: 12 }, (_, i) => (
-                                    <option key={i + 1} value={i + 1}>{new Date(2026, i).toLocaleString('en-US', { month: 'long' })}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Calls</label>
-                            <input className="form-input" type="number" value={logData.calls} onChange={e => setLogData({...logData, calls: parseInt(e.target.value) || 0})} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Appointments</label>
-                            <input className="form-input" type="number" value={logData.appointments} onChange={e => setLogData({...logData, appointments: parseInt(e.target.value) || 0})} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Contracts</label>
-                            <input className="form-input" type="number" value={logData.contracts} onChange={e => setLogData({...logData, contracts: parseInt(e.target.value) || 0})} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Listings</label>
-                            <input className="form-input" type="number" value={logData.listings} onChange={e => setLogData({...logData, listings: parseInt(e.target.value) || 0})} />
-                        </div>
-                    </Modal>
-                </div>
-            );
-        }
-
-        function Tasks({ tasks, setTasks, agents }) {
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [filterAgent, setFilterAgent] = useState('All');
-            const [formData, setFormData] = useState({
-                title: '', assignee: '', priority: 'Medium', due_date: '', status: 'To Do'
-            });
-
-            const priorities = ['High', 'Medium', 'Low'];
-            const statuses = ['To Do', 'In Progress', 'Done'];
-
-            const openModal = () => {
-                setFormData({ title: '', assignee: '', priority: 'Medium', due_date: '', status: 'To Do' });
-                setIsModalOpen(true);
-            };
-
-            const saveTask = async () => {
-                try {
-                    await supabase.from('tasks').insert([formData]);
-                    const { data } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
-                    setTasks(data);
-                    setIsModalOpen(false);
-                } catch (error) {
-                    console.error('Error saving task:', error);
-                }
-            };
-
-            const deleteTask = async (id) => {
-                try {
-                    await supabase.from('tasks').delete().eq('id', id);
-                    setTasks(tasks.filter(t => t.id !== id));
-                } catch (error) {
-                    console.error('Error deleting task:', error);
-                }
-            };
-
-            const updateTaskStatus = async (id, currentStatus) => {
-                const nextStatus = statuses[(statuses.indexOf(currentStatus) + 1) % statuses.length];
-                try {
-                    await supabase.from('tasks').update({ status: nextStatus }).eq('id', id);
-                    setTasks(tasks.map(t => t.id === id ? {...t, status: nextStatus} : t));
-                } catch (error) {
-                    console.error('Error updating task:', error);
-                }
-            };
-
-            const filtered = tasks.filter(t => filterAgent === 'All' || t.assignee === filterAgent);
-
-            const tasksByStatus = {
-                'To Do': filtered.filter(t => t.status === 'To Do'),
-                'In Progress': filtered.filter(t => t.status === 'In Progress'),
-                'Done': filtered.filter(t => t.status === 'Done')
-            };
-
-            return (
-                <div className="page-content">
-                    <div className="filter-row">
-                        <select className="filter-select" value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
-                            <option value="All">All Assignees</option>
-                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
-                        </select>
-                        <button className="btn btn-primary btn-small" onClick={openModal}>+ Add Task</button>
-                    </div>
-
-                    <div className="kanban-container">
-                        {statuses.map(status => (
-                            <div key={status} className="kanban-column">
-                                <div className="kanban-header">{status}</div>
-                                <div className="kanban-cards">
-                                    {tasksByStatus[status].map(task => {
-                                        const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'Done';
-                                        return (
-                                            <div key={task.id} className={`kanban-card ${isOverdue ? 'overdue' : ''}`} onClick={() => updateTaskStatus(task.id, task.status)}>
-                                                <div className="kanban-card-title">{task.title}</div>
-                                                <div className="kanban-card-meta">
-                                                    <Badge label={task.assignee} type="agent" />
-                                                </div>
-                                                <div className="kanban-card-meta">
-                                                    <Badge label={task.priority} type={task.priority.toLowerCase()} />
-                                                </div>
-                                                {task.due_date && (
-                                                    <div className="kanban-card-meta">
-                                                        {new Date(task.due_date).toLocaleDateString()}
-                                                    </div>
-                                                )}
-                                                <button className="btn btn-sm-danger" onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} style={{ marginTop: '8px', width: '100%' }}>Delete</button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <Modal isOpen={isModalOpen} title="Add Task" onClose={() => setIsModalOpen(false)} onSave={saveTask}>
-                        <div className="form-group">
-                            <label className="form-label">Title</label>
-                            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Assignee</label>
-                            <select className="form-select" value={formData.assignee} onChange={e => setFormData({...formData, assignee: e.target.value})}>
-                                <option value="">Select Agent</option>
-                                {agents.map(a => <option key={a} value={a}>{a}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Priority</label>
-                            <select className="form-select" value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}>
-                                {priorities.map(p => <option key={p} value={p}>{p}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Due Date</label>
-                            <input className="form-input" type="date" value={formData.due_date} onChange={e => setFormData({...formData, due_date: e.target.value})} />
-                        </div>
-                    </Modal>
-                </div>
-            );
-        }
-
-        function Content({ contentItems, setContentItems }) {
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [formData, setFormData] = useState({
-                title: '', platform: 'Instagram', stage: 'Ideas', target_date: ''
-            });
-
-            const platforms = ['Instagram', 'TikTok', 'YouTube', 'Instagram/TikTok', 'All Platforms'];
-
-            const openModal = () => {
-                setFormData({ title: '', platform: 'Instagram', stage: 'Ideas', target_date: '' });
-                setIsModalOpen(true);
-            };
-
-            const saveContent = async () => {
-                try {
-                    await supabase.from('content').insert([formData]);
-                    const { data } = await supabase.from('content').select('*').order('created_at', { ascending: false });
-                    setContentItems(data);
-                    setIsModalOpen(false);
-                } catch (error) {
-                    console.error('Error saving content:', error);
-                }
-            };
-
-            const deleteContent = async (id) => {
-                try {
-                    await supabase.from('content').delete().eq('id', id);
-                    setContentItems(contentItems.filter(c => c.id !== id));
-                } catch (error) {
-                    console.error('Error deleting content:', error);
-                }
-            };
-
-            const moveContent = async (id, currentStage) => {
-                const currentIndex = CONTENT_STAGES.indexOf(currentStage);
-                if (currentIndex < CONTENT_STAGES.length - 1) {
-                    const nextStage = CONTENT_STAGES[currentIndex + 1];
-                    try {
-                        await supabase.from('content').update({ stage: nextStage }).eq('id', id);
-                        setContentItems(contentItems.map(c => c.id === id ? {...c, stage: nextStage} : c));
-                    } catch (error) {
-                        console.error('Error moving content:', error);
-                    }
-                }
-            };
-
-            const contentByStage = {};
-            CONTENT_STAGES.forEach(stage => {
-                contentByStage[stage] = contentItems.filter(c => c.stage === stage);
-            });
-
-            return (
-                <div className="page-content">
-                    <div style={{ marginBottom: '20px' }}>
-                        <button className="btn btn-primary btn-small" onClick={openModal}>+ Add Idea</button>
-                    </div>
-
-                    <div className="kanban-container">
-                        {CONTENT_STAGES.map(stage => (
-                            <div key={stage} className="kanban-column">
-                                <div className="kanban-header">{stage}</div>
-                                <div className="kanban-cards">
-                                    {contentByStage[stage].map(item => (
-                                        <div key={item.id} className="kanban-card">
-                                            <div className="kanban-card-title">{item.title}</div>
-                                            <div className="kanban-card-meta">
-                                                <span className="platform-badge">{item.platform}</span>
-                                            </div>
-                                            {item.target_date && (
-                                                <div className="kanban-card-meta">
-                                                    {new Date(item.target_date).toLocaleDateString()}
-                                                </div>
-                                            )}
-                                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                                                {stage !== CONTENT_STAGES[CONTENT_STAGES.length - 1] && (
-                                                    <button className="btn btn-secondary btn-small" onClick={() => moveContent(item.id, stage)}>Move →</button>
-                                                )}
-                                                <button className="btn btn-sm-danger" onClick={() => deleteContent(item.id)}>Delete</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <Modal isOpen={isModalOpen} title="Add Content" onClose={() => setIsModalOpen(false)} onSave={saveContent}>
-                        <div className="form-group">
-                            <label className="form-label">Title</label>
-                            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Platform</label>
-                            <select className="form-select" value={formData.platform} onChange={e => setFormData({...formData, platform: e.target.value})}>
-                                {platforms.map(p => <option key={p} value={p}>{p}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Target Date</label>
-                            <input className="form-input" type="date" value={formData.target_date} onChange={e => setFormData({...formData, target_date: e.target.value})} />
-                        </div>
-                    </Modal>
-                </div>
-            );
-        }
-
-        function App() {
-            const [currentPage, setCurrentPage] = useState('overview');
-            const [deals, setDeals] = useState([]);
-            const [agentGoals, setAgentGoals] = useState([]);
-            const [kpis, setKpis] = useState([]);
-            const [tasks, setTasks] = useState([]);
-            const [contentItems, setContentItems] = useState([]);
-            const [loading, setLoading] = useState(true);
-
-            const agents = ['Addison', 'Will', 'Ron', 'Zach', 'Zayra'];
-
-            useEffect(() => {
-                const fetchData = async () => {
-                    try {
-                        const [dealsRes, goalsRes, kpisRes, tasksRes, contentRes] = await Promise.all([
-                            supabase.from('deals').select('*').order('created_at', { ascending: false }),
-                            supabase.from('agent_goals').select('*'),
-                            supabase.from('kpis').select('*'),
-                            supabase.from('tasks').select('*').order('created_at', { ascending: false }),
-                            supabase.from('content').select('*').order('created_at', { ascending: false })
-                        ]);
-
-                        setDeals(dealsRes.data || []);
-                        setAgentGoals(goalsRes.data || []);
-                        setKpis(kpisRes.data || []);
-                        setTasks(tasksRes.data || []);
-                        setContentItems(contentRes.data || []);
-                    } catch (error) {
-                        console.error('Error fetching data:', error);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-
-                fetchData();
-            }, []);
-
-            if (loading) {
-                return (
-                    <div className="app-container">
-                        <div className="loading">
-                            <div className="spinner"></div>
-                        </div>
-                    </div>
-                );
+    const addTask = async () => {
+        const data = { title: form.title, assignee: form.assignee || currentUser.name, due_date: form.due_date || null, status: 'todo', priority: form.priority || 'medium', updated_at: new Date().toISOString() };
+        const { data: nt, error } = await sb.from('tasks').insert(data).select();
+        if (!error && nt) {
+            setTasks(prev => [...prev, nt[0]]);
+            if (form.notify && form.assignee) {
+                // SMS notification would be sent via scheduled task
+                alert(`Task assigned to ${form.assignee}. SMS notification will be sent.`);
             }
+        }
+        setShowModal(false);
+        setForm({});
+    };
 
-            return (
-                <div className="app-container">
-                    <div className="sidebar">
-                        <div className="sidebar-header">
-                            <div className="sidebar-logo">TCT</div>
-                            <div className="sidebar-subtitle">Team Command Center</div>
-                        </div>
-                        <div className="nav-items">
-                            <div className={`nav-item ${currentPage === 'overview' ? 'active' : ''}`} onClick={() => setCurrentPage('overview')}>
-                                <span className="nav-icon">🏠</span>
-                                <span className="nav-label">Overview</span>
-                            </div>
-                            <div className={`nav-item ${currentPage === 'deals' ? 'active' : ''}`} onClick={() => setCurrentPage('deals')}>
-                                <span className="nav-icon">💰</span>
-                                <span className="nav-label">Deals</span>
-                            </div>
-                            <div className={`nav-item ${currentPage === 'scoreboard' ? 'active' : ''}`} onClick={() => setCurrentPage('scoreboard')}>
-                                <span className="nav-icon">📈</span>
-                                <span className="nav-label">Scoreboard</span>
-                            </div>
-                            <div className={`nav-item ${currentPage === 'tasks' ? 'active' : ''}`} onClick={() => setCurrentPage('tasks')}>
-                                <span className="nav-icon">✅</span>
-                                <span className="nav-label">Tasks</span>
-                            </div>
-                            <div className={`nav-item ${currentPage === 'content' ? 'active' : ''}`} onClick={() => setCurrentPage('content')}>
-                                <span className="nav-icon">🎬</span>
-                                <span className="nav-label">Content</span>
-                            </div>
-                        </div>
-                        <div className="user-card">
-                            <div className="user-avatar">AC</div>
-                            <div className="user-info">
-                                <div className="user-name">Addison</div>
-                                <div className="user-role">Team Lead</div>
-                            </div>
-                        </div>
+    const updateStatus = async (task, newStatus) => {
+        const { error } = await sb.from('tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', task.id);
+        if (!error) setTasks(prev => prev.map(t => t.id === task.id ? {...t, status: newStatus} : t));
+    };
+
+    const priorityColor = (p) => ({ high: '#ef4444', medium: '#eab308', low: '#22c55e' }[p] || '#94a3b8');
+    const statusBadge = (s) => ({ todo: 'badge-gray', 'in-progress': 'badge-blue', done: 'badge-green' }[s] || 'badge-gray');
+
+    const pendingCount = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
+
+    return (
+        <>
+            <div style={{display:'flex',gap:'8px',marginBottom:'20px',flexWrap:'wrap',alignItems:'center'}}>
+                <div className={`tab-item ${filter === 'mine' ? 'active' : ''}`} onClick={() => setFilter('mine')}>My Tasks {pendingCount > 0 && <span className="notification-badge" style={{marginLeft:'6px'}}>{pendingCount}</span>}</div>
+                <div className={`tab-item ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All Tasks</div>
+                <div className={`tab-item ${filter === 'todo' ? 'active' : ''}`} onClick={() => setFilter('todo')}>To Do</div>
+                <div className={`tab-item ${filter === 'in-progress' ? 'active' : ''}`} onClick={() => setFilter('in-progress')}>In Progress</div>
+                <div className={`tab-item ${filter === 'done' ? 'active' : ''}`} onClick={() => setFilter('done')}>Done</div>
+                <div style={{flex:1}}></div>
+                {isAdmin && <button className="btn btn-primary" onClick={() => { setForm({ assignee: '', notify: true }); setShowModal(true); }}>+ Assign Task</button>}
+            </div>
+
+            {filtered.map(t => (
+                <div key={t.id} className="card" style={{display:'flex',gap:'16px',alignItems:'center',padding:'16px'}}>
+                    <div style={{width:'4px',height:'40px',borderRadius:'2px',background: priorityColor(t.priority)}}></div>
+                    <div style={{flex:1}}>
+                        <div style={{fontWeight:500,marginBottom:'4px'}}>{t.title}</div>
+                        <div style={{fontSize:'12px',color:'#64748b'}}>Assigned to: {t.assignee || 'Unassigned'} {t.due_date && `| Due: ${t.due_date}`}</div>
                     </div>
-
-                    <div className="main-content">
-                        <div className="page-header">
-                            <div className="page-title">
-                                {currentPage === 'overview' && 'Team Overview'}
-                                {currentPage === 'deals' && 'Transaction Pipeline'}
-                                {currentPage === 'scoreboard' && 'Agent Performance'}
-                                {currentPage === 'tasks' && 'Team Tasks'}
-                                {currentPage === 'content' && "Will's Content Pipeline"}
-                            </div>
-                        </div>
-
-                        {currentPage === 'overview' && <Overview deals={deals} agentGoals={agentGoals} kpis={kpis} agents={agents} />}
-                        {currentPage === 'deals' && <Deals deals={deals} setDeals={setDeals} agents={agents} />}
-                        {currentPage === 'scoreboard' && <Scoreboard kpis={kpis} setKpis={setKpis} agents={agents} deals={deals} agentGoals={agentGoals} />}
-                        {currentPage === 'tasks' && <Tasks tasks={tasks} setTasks={setTasks} agents={agents} />}
-                        {currentPage === 'content' && <Content contentItems={contentItems} setContentItems={setContentItems} />}
+                    <span className={`badge ${statusBadge(t.status)}`}>{t.status}</span>
+                    <div style={{display:'flex',gap:'6px'}}>
+                        {t.status !== 'in-progress' && <button className="btn btn-sm btn-outline" onClick={() => updateStatus(t, 'in-progress')}>Start</button>}
+                        {t.status !== 'done' && <button className="btn btn-sm btn-outline" style={{borderColor:'rgba(34,197,94,0.3)',color:'#22c55e'}} onClick={() => updateStatus(t, 'done')}>Done</button>}
                     </div>
                 </div>
-            );
-        }
+            ))}
+            {filtered.length === 0 && <div className="empty-state">No tasks to show</div>}
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div className="modal-title">Assign New Task</div>
+                            <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+                        </div>
+                        <div className="form-group"><label className="form-label">Task Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Assign To</label>
+                                <select className="form-select" value={form.assignee||''} onChange={e => setForm({...form, assignee: e.target.value})}>
+                                    <option value="">Select...</option>
+                                    {AGENTS.map(a => <option key={a.name} value={a.name}>{a.name} ({a.role})</option>)}
+                                </select></div>
+                            <div className="form-group"><label className="form-label">Priority</label>
+                                <select className="form-select" value={form.priority||'medium'} onChange={e => setForm({...form, priority: e.target.value})}>
+                                    <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+                                </select></div>
+                        </div>
+                        <div className="form-group"><label className="form-label">Due Date</label><input className="form-input" type="date" value={form.due_date||''} onChange={e => setForm({...form, due_date: e.target.value})} /></div>
+                        <div className="form-group" style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                            <input type="checkbox" checked={form.notify||false} onChange={e => setForm({...form, notify: e.target.checked})} style={{accentColor:'#6366f1'}} />
+                            <label style={{fontSize:'13px',color:'#94a3b8'}}>Send SMS notification to assignee</label>
+                        </div>
+                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
+                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={addTask}>Assign Task</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+// ─── Content Page ───
+function ContentPage({ content, setContent, currentUser }) {
+    const [showModal, setShowModal] = useState(false);
+    const [form, setForm] = useState({});
+    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
+
+    const addContent = async () => {
+        const data = { title: form.title, stage: form.stage || 'Idea', platform: form.platform || '', target_date: form.target_date || null, updated_at: new Date().toISOString() };
+        const { data: nc, error } = await sb.from('content').insert(data).select();
+        if (!error && nc) setContent(prev => [...prev, nc[0]]);
+        setShowModal(false);
+        setForm({});
+    };
+
+    const platforms = ['Instagram', 'Facebook', 'TikTok', 'YouTube', 'Blog', 'Email'];
+    const stages = ['Idea', 'In Progress', 'Review', 'Scheduled', 'Published'];
+
+    return (
+        <>
+            <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'16px'}}>
+                {isAdmin && <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ New Content</button>}
+            </div>
+            <div className="table-container">
+                <table>
+                    <thead><tr><th>Title</th><th>Platform</th><th>Stage</th><th>Target Date</th></tr></thead>
+                    <tbody>
+                        {content.map(c => (
+                            <tr key={c.id}>
+                                <td style={{fontWeight:500}}>{c.title}</td>
+                                <td>{c.platform}</td>
+                                <td><span className={`badge ${c.stage === 'Published' ? 'badge-green' : c.stage === 'Scheduled' ? 'badge-blue' : 'badge-gray'}`}>{c.stage}</span></td>
+                                <td>{c.target_date || '—'}</td>
+                            </tr>
+                        ))}
+                        {content.length === 0 && <tr><td colSpan={4} className="empty-state">No content items yet</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header"><div className="modal-title">New Content</div><button className="modal-close" onClick={() => setShowModal(false)}>×</button></div>
+                        <div className="form-group"><label className="form-label">Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
+                        <div className="form-row">
+                            <div className="form-group"><label className="form-label">Platform</label>
+                                <select className="form-select" value={form.platform||''} onChange={e => setForm({...form, platform: e.target.value})}>
+                                    <option value="">Select...</option>{platforms.map(p => <option key={p} value={p}>{p}</option>)}
+                                </select></div>
+                            <div className="form-group"><label className="form-label">Stage</label>
+                                <select className="form-select" value={form.stage||'Idea'} onChange={e => setForm({...form, stage: e.target.value})}>
+                                    {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select></div>
+                        </div>
+                        <div className="form-group"><label className="form-label">Target Date</label><input className="form-input" type="date" value={form.target_date||''} onChange={e => setForm({...form, target_date: e.target.value})} /></div>
+                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
+                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+                            <button className="btn btn-primary" onClick={addContent}>Create</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+// ─── Main App ───
+function App() {
+    const [currentUser, setCurrentUser] = useState(null);
+    const [page, setPage] = useState('overview');
+    const [deals, setDeals] = useState([]);
+    const [goals, setGoals] = useState([]);
+    const [kpis, setKpis] = useState([]);
+    const [tasks, setTasks] = useState([]);
+    const [content, setContent] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        (async () => {
+            setLoading(true);
+            const [d, g, k, t, c] = await Promise.all([
+                sb.from('deals').select('*').order('created_at', { ascending: false }),
+                sb.from('agent_goals').select('*'),
+                sb.from('kpis').select('*'),
+                sb.from('tasks').select('*').order('created_at', { ascending: false }),
+                sb.from('content').select('*').order('created_at', { ascending: false }),
+            ]);
+            if (d.data) setDeals(d.data);
+            if (g.data) setGoals(g.data);
+            if (k.data) setKpis(k.data);
+            if (t.data) setTasks(t.data);
+            if (c.data) setContent(c.data);
+            setLoading(false);
+        })();
+    }, [currentUser]);
+
+    if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
+
+    const pages = [
+        { id: 'overview', label: 'Overview', icon: '📊' },
+        { id: 'deals', label: 'Deals', icon: '🏠' },
+        { id: 'scoreboard', label: 'Scoreboard', icon: '🏆' },
+        { id: 'tasks', label: 'Tasks', icon: '✅' },
+        { id: 'content', label: 'Content', icon: '📱' },
+    ];
+
+    const pendingTasks = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
+
+    const pageTitle = { overview: 'Team Overview', deals: 'Deal Pipeline', scoreboard: 'Scoreboard & Coaching', tasks: 'Tasks', content: 'Content Planner' };
+
+    return (
+        <div className="app-container">
+            <div className="sidebar">
+                <div className="sidebar-header">
+                    <div className="sidebar-logo">TCT</div>
+                    <div className="sidebar-subtitle">Team Command Center</div>
+                </div>
+                <div className="nav-items">
+                    {pages.map(p => (
+                        <div key={p.id} className={`nav-item ${page === p.id ? 'active' : ''}`} onClick={() => setPage(p.id)}>
+                            <span className="nav-icon">{p.icon}</span>
+                            <span className="nav-label">{p.label}</span>
+                            {p.id === 'tasks' && pendingTasks > 0 && <span className="notification-badge">{pendingTasks}</span>}
+                        </div>
+                    ))}
+                </div>
+                <div className="user-card">
+                    <div className="user-avatar" style={{background: currentUser.color}}>{currentUser.name[0]}</div>
+                    <div className="user-info">
+                        <div className="user-name">{currentUser.name}</div>
+                        <div className="user-role">{currentUser.role}</div>
+                    </div>
+                </div>
+                <button className="logout-btn" onClick={() => { setCurrentUser(null); setPage('overview'); }}>Sign Out</button>
+            </div>
+            <div className="main-content">
+                <div className="page-header">
+                    <div className="page-title">{pageTitle[page]}</div>
+                    {loading && <div style={{fontSize:'12px',color:'#64748b'}}>Loading...</div>}
+                </div>
+                <div className="page-content">
+                    {page === 'overview' && <OverviewPage deals={deals} goals={goals} kpis={kpis} currentUser={currentUser} />}
+                    {page === 'deals' && <DealsPage deals={deals} setDeals={setDeals} currentUser={currentUser} />}
+                    {page === 'scoreboard' && <ScoreboardPage deals={deals} kpis={kpis} goals={goals} />}
+                    {page === 'tasks' && <TasksPage tasks={tasks} setTasks={setTasks} currentUser={currentUser} />}
+                    {page === 'content' && <ContentPage content={content} setContent={setContent} currentUser={currentUser} />}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
