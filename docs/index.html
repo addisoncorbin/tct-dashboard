@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCT Team Command Center</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+            gap: 0;
+        }
+        .sidebar {
+            width: 220px;
+            background: #1a1d27;
+            border-right: 1px solid #2a2d3a;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+        .sidebar-logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 4px;
+        }
+        .sidebar-subtitle {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sidebar.collapsed .sidebar-subtitle {
+            display: none;
+        }
+        .nav-items {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .nav-item:hover {
+            background: #22253a;
+            color: #e2e8f0;
+        }
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #6366f1;
+        }
+        .nav-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .nav-label {
+            font-size: 14px;
+        }
+        .sidebar.collapsed .nav-label {
+            display: none;
+        }
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #22253a;
+            border-radius: 8px;
+            border: 1px solid #2a2d3a;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .user-role {
+            font-size: 11px;
+            color: #64748b;
+        }
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .page-header {
+            padding: 24px;
+            border-bottom: 1px solid #2a2d3a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .page-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+        .stat-card:hover {
+            background: #22253a;
+            border-color: #3a3d4a;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+        .stat-subtext {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #2a2d3a;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #818cf8);
+            transition: width 0.3s ease;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #818cf8;
+        }
+        .btn-secondary {
+            background: #2a2d3a;
+            color: #e2e8f0;
+            border: 1px solid #3a3d4a;
+        }
+        .btn-secondary:hover {
+            background: #3a3d4a;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .btn-sm-danger {
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        .btn-sm-danger:hover {
+            background: #dc2626;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            color: #e2e8f0;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1117;
+            border: 1px solid #2a2d3a;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #2a2d3a;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-agent {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+        .badge-stage {
+            padding: 4px 10px;
+        }
+        .badge-prospect { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+        .badge-listing { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .badge-contract { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
+        .badge-closed { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+        .badge-terminated { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .badge-priority-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .badge-priority-medium { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
+        .badge-priority-low { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .badge-content-ideas { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+        .badge-content-week { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .badge-content-filming { background: rgba(234, 179, 8, 0.2); color: #fcd34d; }
+        .badge-content-ready { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
+        .badge-content-posted { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a1d27;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2a2d3a;
+        }
+        .table th {
+            background: #22253a;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #2a2d3a;
+            font-size: 13px;
+        }
+        .table tbody tr:hover {
+            background: #22253a;
+        }
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .kanban-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .kanban-column {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 500px;
+        }
+        .kanban-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kanban-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .kanban-card {
+            background: #22253a;
+            border: 1px solid #2a2d3a;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .kanban-card:hover {
+            background: #2a2d3f;
+            border-color: #3a3d4a;
+        }
+        .kanban-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        .kanban-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #64748b;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #2a2d3a;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .filter-select:hover {
+            border-color: #3a3d4a;
+        }
+        .agent-performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .agent-card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .agent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .agent-card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+        }
+        .agent-card-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .agent-card-info p {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .agent-card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .agent-stat {
+            background: #0f1117;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #2a2d3a;
+        }
+        .agent-stat-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .agent-stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .kpi-box {
+            background: #0f1117;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #2a2d3a;
+            text-align: center;
+        }
+        .kpi-box-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .kpi-box-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+        .monthly-activity {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .monthly-card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .monthly-card-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+        }
+        .monthly-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2d3a;
+            font-size: 12px;
+        }
+        .monthly-stat-row:last-child {
+            border-bottom: none;
+        }
+        .monthly-stat-label {
+            color: #94a3b8;
+        }
+        .monthly-stat-value {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+        .overdue {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.05) !important;
+        }
+        .platform-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+        .content-stage-colors {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        .stage-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar-subtitle, .nav-label, .user-info {
+                display: none;
+            }
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+            .kanban-container {
+                grid-template-columns: 1fr;
+            }
+            .agent-performance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+        const { createClient } = window.supabase;
+
+        const supabase = createClient(
+            'https://idmxupicsrmbujtrgdrf.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzI5MzAsImV4cCI6MjA5MDIwODkzMH0.0CKwkwS7gmaY8s60bG8ekPaBdFWXFocil8UCaiAa1go'
+        );
+
+        const AGENT_COLORS = {
+            'Addison': '#6366f1',
+            'Will': '#3b82f6',
+            'Ron': '#22c55e',
+            'Zach': '#f97316',
+            'Zayra': '#a855f7'
+        };
+
+        const STAGE_COLORS = {
+            'Prospect': '#a855f7',
+            'Listing': '#3b82f6',
+            'Under Contract': '#eab308',
+            'Closed': '#22c55e',
+            'Terminated': '#ef4444'
+        };
+
+        const CONTENT_STAGES = ['Ideas', 'This Week', 'Filming', 'Ready to Post', 'Posted'];
+        const CONTENT_STAGE_COLORS = {
+            'Ideas': '#a855f7',
+            'This Week': '#3b82f6',
+            'Filming': '#eab308',
+            'Ready to Post': '#f97316',
+            'Posted': '#22c55e'
+        };
+
+        function formatCurrency(value) {
+            if (!value) return '$0';
+            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+            return '$' + value.toLocaleString();
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+
+        function Badge({ label, type = 'default', color }) {
+            const classMap = {
+                'prospect': 'badge-prospect',
+                'listing': 'badge-listing',
+                'contract': 'badge-contract',
+                'closed': 'badge-closed',
+                'terminated': 'badge-terminated',
+                'high': 'badge-priority-high',
+                'medium': 'badge-priority-medium',
+                'low': 'badge-priority-low',
+                'ideas': 'badge-content-ideas',
+                'week': 'badge-content-week',
+                'filming': 'badge-content-filming',
+                'ready': 'badge-content-ready',
+                'posted': 'badge-content-posted'
+            };
+            return <span className={`badge ${classMap[type] || 'badge-agent'}`}>{label}</span>;
+        }
+
+        function Modal({ isOpen, title, onClose, onSave, children, showSave = true }) {
+            if (!isOpen) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div className="modal-title">{title}</div>
+                            <button className="modal-close" onClick={onClose}>×</button>
+                        </div>
+                        {children}
+                        {showSave && (
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                                <button className="btn btn-primary" onClick={onSave}>Save</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function Overview({ deals, agentGoals, kpis, agents }) {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+
+            const closedDeals = deals.filter(d => d.stage === 'Closed');
+            const closedVolume = closedDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
+            const closedGCI = closedDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
+
+            const teamGoal = agentGoals.reduce((sum, ag) => sum + (ag.annual_goal || 0), 0);
+            const progressToGoal = teamGoal > 0 ? ((closedVolume / teamGoal) * 100).toFixed(1) : 0;
+
+            const activePipeline = deals.filter(d => ['Prospect', 'Listing', 'Under Contract'].includes(d.stage));
+            const activePipelineVolume = activePipeline.reduce((sum, d) => sum + (d.sale_price || 0), 0);
+
+            const monthlyClosings = {};
+            closedDeals.forEach(deal => {
+                if (deal.close_date) {
+                    const date = new Date(deal.close_date);
+                    const monthKey = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                    if (!monthlyClosings[monthKey]) monthlyClosings[monthKey] = { volume: 0, count: 0, deals: [] };
+                    monthlyClosings[monthKey].volume += deal.sale_price || 0;
+                    monthlyClosings[monthKey].count += 1;
+                    monthlyClosings[monthKey].deals.push(deal);
+                }
+            });
+
+            return (
+                <div className="page-content">
+                    <div className="stat-grid">
+                        <div className="stat-card">
+                            <div className="stat-label">Closed Volume (YTD)</div>
+                            <div className="stat-value">{formatCurrency(closedVolume)}</div>
+                            <div className="stat-subtext">{progressToGoal}% to team goal</div>
+                            <div className="progress-bar">
+                                <div className="progress-fill" style={{ width: Math.min(progressToGoal, 100) + '%' }}></div>
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">Team GCI</div>
+                            <div className="stat-value">{formatCurrency(closedGCI)}</div>
+                            <div className="stat-subtext">{closedDeals.length} deals closed</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">Active Pipeline</div>
+                            <div className="stat-value">{activePipeline.length}</div>
+                            <div className="stat-subtext">{formatCurrency(activePipelineVolume)} in deals</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">Team Size</div>
+                            <div className="stat-value">{agents.length}</div>
+                            <div className="stat-subtext">agents active</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>Agent Performance (YTD)</h3>
+                    <div className="agent-performance-grid">
+                        {agents.map(agent => {
+                            const goal = agentGoals.find(g => g.agent === agent)?.annual_goal || 0;
+                            const agentDeals = closedDeals.filter(d => d.agent === agent);
+                            const agentVolume = agentDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
+                            const agentGCI = agentDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
+                            const agentCalls = kpis.filter(k => k.agent === agent).reduce((sum, k) => sum + (k.calls || 0), 0);
+                            const gap = (goal - agentVolume).toFixed(0);
+                            const progress = goal > 0 ? ((agentVolume / goal) * 100).toFixed(0) : 0;
+
+                            return (
+                                <div key={agent} className="agent-card">
+                                    <div className="agent-card-header">
+                                        <div className="agent-card-avatar" style={{ background: AGENT_COLORS[agent] }}>
+                                            {getInitials(agent)}
+                                        </div>
+                                        <div className="agent-card-info">
+                                            <h3>{agent}</h3>
+                                            <p>Goal: {formatCurrency(goal)}</p>
+                                        </div>
+                                    </div>
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>
+                                            {formatCurrency(agentVolume)}
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div className="progress-fill" style={{ width: Math.min(progress, 100) + '%', background: AGENT_COLORS[agent] }}></div>
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                                            {progress}% to goal
+                                        </div>
+                                    </div>
+                                    <div className="agent-card-stats">
+                                        <div className="agent-stat">
+                                            <div className="agent-stat-label">Units</div>
+                                            <div className="agent-stat-value">{agentDeals.length}</div>
+                                        </div>
+                                        <div className="agent-stat">
+                                            <div className="agent-stat-label">Calls</div>
+                                            <div className="agent-stat-value">{agentCalls}</div>
+                                        </div>
+                                        <div className="agent-stat">
+                                            <div className="agent-stat-label">Gap</div>
+                                            <div className="agent-stat-value" style={{ color: gap > 0 ? '#ef4444' : '#22c55e' }}>
+                                                {formatCurrency(Math.abs(gap))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: '600' }}>Monthly Closings</h3>
+                    <div className="monthly-activity">
+                        {Object.entries(monthlyClosings).sort((a, b) => new Date(b[0]) - new Date(a[0])).map(([month, data]) => (
+                            <div key={month} className="monthly-card">
+                                <div className="monthly-card-header">{month}</div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Volume</span>
+                                    <span className="monthly-stat-value">{formatCurrency(data.volume)}</span>
+                                </div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Units</span>
+                                    <span className="monthly-stat-value">{data.count}</span>
+                                </div>
+                                {data.deals.slice(0, 3).map((deal, i) => (
+                                    <div key={i} style={{ fontSize: '11px', color: '#64748b', paddingTop: '8px', borderTop: '1px solid #2a2d3a' }}>
+                                        {deal.address?.substring(0, 30)}... - {formatCurrency(deal.sale_price)}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function Deals({ deals, setDeals, agents }) {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingDeal, setEditingDeal] = useState(null);
+            const [filterStage, setFilterStage] = useState('All');
+            const [filterAgent, setFilterAgent] = useState('All');
+            const [formData, setFormData] = useState({
+                address: '', client: '', agent: '', side: 'Buy', stage: 'Prospect',
+                sale_price: '', gross_commission: '', team_gross: '', split: '',
+                source: '', lender: '', binding_date: '', close_date: '', due_diligence: '', financing_contingency: ''
+            });
+
+            const stages = ['Prospect', 'Listing', 'Under Contract', 'Closed', 'Terminated'];
+            const sides = ['Buy', 'Sell', 'Both'];
+
+            const openModal = (deal = null) => {
+                if (deal) {
+                    setEditingDeal(deal);
+                    setFormData(deal);
+                } else {
+                    setEditingDeal(null);
+                    setFormData({
+                        address: '', client: '', agent: '', side: 'Buy', stage: 'Prospect',
+                        sale_price: '', gross_commission: '', team_gross: '', split: '',
+                        source: '', lender: '', binding_date: '', close_date: '', due_diligence: '', financing_contingency: ''
+                    });
+                }
+                setIsModalOpen(true);
+            };
+
+            const saveDeal = async () => {
+                try {
+                    if (editingDeal) {
+                        await supabase.from('deals').update(formData).eq('id', editingDeal.id);
+                    } else {
+                        await supabase.from('deals').insert([formData]);
+                    }
+                    const { data } = await supabase.from('deals').select('*').order('created_at', { ascending: false });
+                    setDeals(data);
+                    setIsModalOpen(false);
+                } catch (error) {
+                    console.error('Error saving deal:', error);
+                }
+            };
+
+            const deleteDeal = async (id) => {
+                try {
+                    await supabase.from('deals').delete().eq('id', id);
+                    setDeals(deals.filter(d => d.id !== id));
+                } catch (error) {
+                    console.error('Error deleting deal:', error);
+                }
+            };
+
+            const filtered = deals.filter(d => {
+                if (filterStage !== 'All' && d.stage !== filterStage) return false;
+                if (filterAgent !== 'All' && d.agent !== filterAgent) return false;
+                return true;
+            });
+
+            const stageCounts = {};
+            const stageVolumes = {};
+            stages.forEach(s => {
+                stageCounts[s] = deals.filter(d => d.stage === s).length;
+                stageVolumes[s] = deals.filter(d => d.stage === s).reduce((sum, d) => sum + (d.sale_price || 0), 0);
+            });
+
+            return (
+                <div className="page-content">
+                    <div className="stat-grid">
+                        {stages.map(stage => (
+                            <div key={stage} className="stat-card" onClick={() => setFilterStage(stage)} style={{ cursor: 'pointer' }}>
+                                <div className="stat-label">{stage}</div>
+                                <div className="stat-value">{stageCounts[stage]}</div>
+                                <div className="stat-subtext">{formatCurrency(stageVolumes[stage])}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="filter-row">
+                        <select className="filter-select" value={filterStage} onChange={e => setFilterStage(e.target.value)}>
+                            <option value="All">All Stages</option>
+                            {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <select className="filter-select" value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
+                            <option value="All">All Agents</option>
+                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                        <button className="btn btn-primary btn-small" onClick={() => openModal()}>+ Add Deal</button>
+                    </div>
+
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Address</th>
+                                <th>Client</th>
+                                <th>Agent</th>
+                                <th>Side</th>
+                                <th>Stage</th>
+                                <th>Sale Price</th>
+                                <th>GCI</th>
+                                <th>Team Gross</th>
+                                <th>Source</th>
+                                <th>Close Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map(deal => (
+                                <tr key={deal.id}>
+                                    <td>{deal.address}</td>
+                                    <td>{deal.client}</td>
+                                    <td><Badge label={deal.agent} type="agent" color={AGENT_COLORS[deal.agent]} /></td>
+                                    <td>{deal.side}</td>
+                                    <td><Badge label={deal.stage} type={deal.stage.toLowerCase().replace(' ', '')} /></td>
+                                    <td>{formatCurrency(deal.sale_price)}</td>
+                                    <td>{formatCurrency(deal.gross_commission)}</td>
+                                    <td>{formatCurrency(deal.team_gross)}</td>
+                                    <td>{deal.source}</td>
+                                    <td>{deal.close_date ? new Date(deal.close_date).toLocaleDateString() : '-'}</td>
+                                    <td>
+                                        <button className="btn btn-secondary btn-small" onClick={() => openModal(deal)}>Edit</button>
+                                        <button className="btn btn-sm-danger" onClick={() => deleteDeal(deal.id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <Modal isOpen={isModalOpen} title={editingDeal ? 'Edit Deal' : 'Add Deal'} onClose={() => setIsModalOpen(false)} onSave={saveDeal}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <div className="form-group">
+                                <label className="form-label">Address</label>
+                                <input className="form-input" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Client</label>
+                                <input className="form-input" value={formData.client} onChange={e => setFormData({...formData, client: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Agent</label>
+                                <select className="form-select" value={formData.agent} onChange={e => setFormData({...formData, agent: e.target.value})}>
+                                    <option value="">Select Agent</option>
+                                    {agents.map(a => <option key={a} value={a}>{a}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Side</label>
+                                <select className="form-select" value={formData.side} onChange={e => setFormData({...formData, side: e.target.value})}>
+                                    {sides.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Stage</label>
+                                <select className="form-select" value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
+                                    {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Sale Price</label>
+                                <input className="form-input" type="number" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: parseFloat(e.target.value) || 0})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Gross Commission</label>
+                                <input className="form-input" type="number" value={formData.gross_commission} onChange={e => setFormData({...formData, gross_commission: parseFloat(e.target.value) || 0})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Team Gross</label>
+                                <input className="form-input" type="number" value={formData.team_gross} onChange={e => setFormData({...formData, team_gross: parseFloat(e.target.value) || 0})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Split %</label>
+                                <input className="form-input" type="number" value={formData.split} onChange={e => setFormData({...formData, split: parseFloat(e.target.value) || 0})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Source</label>
+                                <input className="form-input" value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Lender</label>
+                                <input className="form-input" value={formData.lender} onChange={e => setFormData({...formData, lender: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Close Date</label>
+                                <input className="form-input" type="date" value={formData.close_date} onChange={e => setFormData({...formData, close_date: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Binding Date</label>
+                                <input className="form-input" type="date" value={formData.binding_date} onChange={e => setFormData({...formData, binding_date: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Due Diligence</label>
+                                <input className="form-input" type="date" value={formData.due_diligence} onChange={e => setFormData({...formData, due_diligence: e.target.value})} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Financing Contingency</label>
+                                <input className="form-input" type="date" value={formData.financing_contingency} onChange={e => setFormData({...formData, financing_contingency: e.target.value})} />
+                            </div>
+                        </div>
+                    </Modal>
+                </div>
+            );
+        }
+
+        function Scoreboard({ kpis, setKpis, agents, deals, agentGoals }) {
+            const [selectedAgent, setSelectedAgent] = useState(agents[0] || '');
+            const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+            const [logData, setLogData] = useState({
+                month: new Date().getMonth() + 1,
+                calls: 0,
+                appointments: 0,
+                contracts: 0,
+                listings: 0
+            });
+
+            const currentYear = new Date().getFullYear();
+
+            const logActivity = async () => {
+                try {
+                    await supabase.from('kpis').upsert({
+                        agent: selectedAgent,
+                        month: logData.month,
+                        year: currentYear,
+                        calls: logData.calls,
+                        appointments: logData.appointments,
+                        contracts: logData.contracts,
+                        listings: logData.listings
+                    }, { onConflict: 'agent,month,year' });
+                    const { data } = await supabase.from('kpis').select('*');
+                    setKpis(data);
+                    setIsLogModalOpen(false);
+                    setLogData({ month: new Date().getMonth() + 1, calls: 0, appointments: 0, contracts: 0, listings: 0 });
+                } catch (error) {
+                    console.error('Error logging activity:', error);
+                }
+            };
+
+            const agentYTDKpis = kpis.filter(k => k.agent === selectedAgent && k.year === currentYear);
+            const agentCalls = agentYTDKpis.reduce((sum, k) => sum + (k.calls || 0), 0);
+            const agentAppointments = agentYTDKpis.reduce((sum, k) => sum + (k.appointments || 0), 0);
+            const agentContracts = agentYTDKpis.reduce((sum, k) => sum + (k.contracts || 0), 0);
+            const agentListings = agentYTDKpis.reduce((sum, k) => sum + (k.listings || 0), 0);
+
+            const agentDeals = deals.filter(d => d.agent === selectedAgent && d.stage === 'Closed');
+            const agentGCI = agentDeals.reduce((sum, d) => sum + (d.team_gross || 0), 0);
+            const agentActive = deals.filter(d => d.agent === selectedAgent && ['Prospect', 'Listing', 'Under Contract'].includes(d.stage));
+
+            const goal = agentGoals.find(g => g.agent === selectedAgent)?.annual_goal || 0;
+            const agentVolume = agentDeals.reduce((sum, d) => sum + (d.sale_price || 0), 0);
+            const gapToGoal = goal - agentVolume;
+
+            const monthlyBreakdown = {};
+            agentYTDKpis.forEach(k => {
+                const monthName = new Date(2026, k.month - 1).toLocaleString('en-US', { month: 'short' });
+                monthlyBreakdown[monthName] = {
+                    calls: k.calls || 0,
+                    appointments: k.appointments || 0,
+                    contracts: k.contracts || 0,
+                    listings: k.listings || 0
+                };
+            });
+
+            return (
+                <div className="page-content">
+                    <div className="filter-row">
+                        <select className="filter-select" value={selectedAgent} onChange={e => setSelectedAgent(e.target.value)}>
+                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                        <button className="btn btn-primary btn-small" onClick={() => setIsLogModalOpen(true)}>Log Activity</button>
+                    </div>
+
+                    <div className="agent-card" style={{ marginBottom: '24px' }}>
+                        <div className="agent-card-header">
+                            <div className="agent-card-avatar" style={{ background: AGENT_COLORS[selectedAgent] }}>
+                                {getInitials(selectedAgent)}
+                            </div>
+                            <div className="agent-card-info">
+                                <h3>{selectedAgent}</h3>
+                                <p>Annual Goal: {formatCurrency(goal)}</p>
+                            </div>
+                        </div>
+                        <div style={{ marginBottom: '16px' }}>
+                            <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                                {formatCurrency(agentVolume)}
+                            </div>
+                            <div className="progress-bar">
+                                <div className="progress-fill" style={{ width: Math.min((agentVolume / goal) * 100, 100) + '%', background: AGENT_COLORS[selectedAgent] }}></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
+                                <span>{((agentVolume / goal) * 100).toFixed(0)}% to goal</span>
+                                <span style={{ color: gapToGoal > 0 ? '#ef4444' : '#22c55e' }}>Gap: {formatCurrency(Math.abs(gapToGoal))}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>YTD Performance</h3>
+                    <div className="kpi-grid">
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">Units Closed</div>
+                            <div className="kpi-box-value">{agentDeals.length}</div>
+                        </div>
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">GCI Earned</div>
+                            <div className="kpi-box-value">{formatCurrency(agentGCI)}</div>
+                        </div>
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">Active Deals</div>
+                            <div className="kpi-box-value">{agentActive.length}</div>
+                        </div>
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">Calls YTD</div>
+                            <div className="kpi-box-value">{agentCalls}</div>
+                        </div>
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">Appointments</div>
+                            <div className="kpi-box-value">{agentAppointments}</div>
+                        </div>
+                        <div className="kpi-box">
+                            <div className="kpi-box-label">Contracts</div>
+                            <div className="kpi-box-value">{agentContracts}</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginBottom: '12px', marginTop: '24px', fontSize: '14px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Monthly Breakdown</h3>
+                    <div className="monthly-activity">
+                        {Object.entries(monthlyBreakdown).map(([month, stats]) => (
+                            <div key={month} className="monthly-card">
+                                <div className="monthly-card-header">{month}</div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Calls</span>
+                                    <span className="monthly-stat-value">{stats.calls}</span>
+                                </div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Appointments</span>
+                                    <span className="monthly-stat-value">{stats.appointments}</span>
+                                </div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Contracts</span>
+                                    <span className="monthly-stat-value">{stats.contracts}</span>
+                                </div>
+                                <div className="monthly-stat-row">
+                                    <span className="monthly-stat-label">Listings</span>
+                                    <span className="monthly-stat-value">{stats.listings}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <Modal isOpen={isLogModalOpen} title="Log Activity" onClose={() => setIsLogModalOpen(false)} onSave={logActivity}>
+                        <div className="form-group">
+                            <label className="form-label">Month</label>
+                            <select className="form-select" value={logData.month} onChange={e => setLogData({...logData, month: parseInt(e.target.value)})}>
+                                {Array.from({ length: 12 }, (_, i) => (
+                                    <option key={i + 1} value={i + 1}>{new Date(2026, i).toLocaleString('en-US', { month: 'long' })}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Calls</label>
+                            <input className="form-input" type="number" value={logData.calls} onChange={e => setLogData({...logData, calls: parseInt(e.target.value) || 0})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Appointments</label>
+                            <input className="form-input" type="number" value={logData.appointments} onChange={e => setLogData({...logData, appointments: parseInt(e.target.value) || 0})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Contracts</label>
+                            <input className="form-input" type="number" value={logData.contracts} onChange={e => setLogData({...logData, contracts: parseInt(e.target.value) || 0})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Listings</label>
+                            <input className="form-input" type="number" value={logData.listings} onChange={e => setLogData({...logData, listings: parseInt(e.target.value) || 0})} />
+                        </div>
+                    </Modal>
+                </div>
+            );
+        }
+
+        function Tasks({ tasks, setTasks, agents }) {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [filterAgent, setFilterAgent] = useState('All');
+            const [formData, setFormData] = useState({
+                title: '', assignee: '', priority: 'Medium', due_date: '', status: 'To Do'
+            });
+
+            const priorities = ['High', 'Medium', 'Low'];
+            const statuses = ['To Do', 'In Progress', 'Done'];
+
+            const openModal = () => {
+                setFormData({ title: '', assignee: '', priority: 'Medium', due_date: '', status: 'To Do' });
+                setIsModalOpen(true);
+            };
+
+            const saveTask = async () => {
+                try {
+                    await supabase.from('tasks').insert([formData]);
+                    const { data } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
+                    setTasks(data);
+                    setIsModalOpen(false);
+                } catch (error) {
+                    console.error('Error saving task:', error);
+                }
+            };
+
+            const deleteTask = async (id) => {
+                try {
+                    await supabase.from('tasks').delete().eq('id', id);
+                    setTasks(tasks.filter(t => t.id !== id));
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                }
+            };
+
+            const updateTaskStatus = async (id, currentStatus) => {
+                const nextStatus = statuses[(statuses.indexOf(currentStatus) + 1) % statuses.length];
+                try {
+                    await supabase.from('tasks').update({ status: nextStatus }).eq('id', id);
+                    setTasks(tasks.map(t => t.id === id ? {...t, status: nextStatus} : t));
+                } catch (error) {
+                    console.error('Error updating task:', error);
+                }
+            };
+
+            const filtered = tasks.filter(t => filterAgent === 'All' || t.assignee === filterAgent);
+
+            const tasksByStatus = {
+                'To Do': filtered.filter(t => t.status === 'To Do'),
+                'In Progress': filtered.filter(t => t.status === 'In Progress'),
+                'Done': filtered.filter(t => t.status === 'Done')
+            };
+
+            return (
+                <div className="page-content">
+                    <div className="filter-row">
+                        <select className="filter-select" value={filterAgent} onChange={e => setFilterAgent(e.target.value)}>
+                            <option value="All">All Assignees</option>
+                            {agents.map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                        <button className="btn btn-primary btn-small" onClick={openModal}>+ Add Task</button>
+                    </div>
+
+                    <div className="kanban-container">
+                        {statuses.map(status => (
+                            <div key={status} className="kanban-column">
+                                <div className="kanban-header">{status}</div>
+                                <div className="kanban-cards">
+                                    {tasksByStatus[status].map(task => {
+                                        const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'Done';
+                                        return (
+                                            <div key={task.id} className={`kanban-card ${isOverdue ? 'overdue' : ''}`} onClick={() => updateTaskStatus(task.id, task.status)}>
+                                                <div className="kanban-card-title">{task.title}</div>
+                                                <div className="kanban-card-meta">
+                                                    <Badge label={task.assignee} type="agent" />
+                                                </div>
+                                                <div className="kanban-card-meta">
+                                                    <Badge label={task.priority} type={task.priority.toLowerCase()} />
+                                                </div>
+                                                {task.due_date && (
+                                                    <div className="kanban-card-meta">
+                                                        {new Date(task.due_date).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                                <button className="btn btn-sm-danger" onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} style={{ marginTop: '8px', width: '100%' }}>Delete</button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <Modal isOpen={isModalOpen} title="Add Task" onClose={() => setIsModalOpen(false)} onSave={saveTask}>
+                        <div className="form-group">
+                            <label className="form-label">Title</label>
+                            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Assignee</label>
+                            <select className="form-select" value={formData.assignee} onChange={e => setFormData({...formData, assignee: e.target.value})}>
+                                <option value="">Select Agent</option>
+                                {agents.map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Priority</label>
+                            <select className="form-select" value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})}>
+                                {priorities.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Due Date</label>
+                            <input className="form-input" type="date" value={formData.due_date} onChange={e => setFormData({...formData, due_date: e.target.value})} />
+                        </div>
+                    </Modal>
+                </div>
+            );
+        }
+
+        function Content({ contentItems, setContentItems }) {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [formData, setFormData] = useState({
+                title: '', platform: 'Instagram', stage: 'Ideas', target_date: ''
+            });
+
+            const platforms = ['Instagram', 'TikTok', 'YouTube', 'Instagram/TikTok', 'All Platforms'];
+
+            const openModal = () => {
+                setFormData({ title: '', platform: 'Instagram', stage: 'Ideas', target_date: '' });
+                setIsModalOpen(true);
+            };
+
+            const saveContent = async () => {
+                try {
+                    await supabase.from('content').insert([formData]);
+                    const { data } = await supabase.from('content').select('*').order('created_at', { ascending: false });
+                    setContentItems(data);
+                    setIsModalOpen(false);
+                } catch (error) {
+                    console.error('Error saving content:', error);
+                }
+            };
+
+            const deleteContent = async (id) => {
+                try {
+                    await supabase.from('content').delete().eq('id', id);
+                    setContentItems(contentItems.filter(c => c.id !== id));
+                } catch (error) {
+                    console.error('Error deleting content:', error);
+                }
+            };
+
+            const moveContent = async (id, currentStage) => {
+                const currentIndex = CONTENT_STAGES.indexOf(currentStage);
+                if (currentIndex < CONTENT_STAGES.length - 1) {
+                    const nextStage = CONTENT_STAGES[currentIndex + 1];
+                    try {
+                        await supabase.from('content').update({ stage: nextStage }).eq('id', id);
+                        setContentItems(contentItems.map(c => c.id === id ? {...c, stage: nextStage} : c));
+                    } catch (error) {
+                        console.error('Error moving content:', error);
+                    }
+                }
+            };
+
+            const contentByStage = {};
+            CONTENT_STAGES.forEach(stage => {
+                contentByStage[stage] = contentItems.filter(c => c.stage === stage);
+            });
+
+            return (
+                <div className="page-content">
+                    <div style={{ marginBottom: '20px' }}>
+                        <button className="btn btn-primary btn-small" onClick={openModal}>+ Add Idea</button>
+                    </div>
+
+                    <div className="kanban-container">
+                        {CONTENT_STAGES.map(stage => (
+                            <div key={stage} className="kanban-column">
+                                <div className="kanban-header">{stage}</div>
+                                <div className="kanban-cards">
+                                    {contentByStage[stage].map(item => (
+                                        <div key={item.id} className="kanban-card">
+                                            <div className="kanban-card-title">{item.title}</div>
+                                            <div className="kanban-card-meta">
+                                                <span className="platform-badge">{item.platform}</span>
+                                            </div>
+                                            {item.target_date && (
+                                                <div className="kanban-card-meta">
+                                                    {new Date(item.target_date).toLocaleDateString()}
+                                                </div>
+                                            )}
+                                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                                {stage !== CONTENT_STAGES[CONTENT_STAGES.length - 1] && (
+                                                    <button className="btn btn-secondary btn-small" onClick={() => moveContent(item.id, stage)}>Move →</button>
+                                                )}
+                                                <button className="btn btn-sm-danger" onClick={() => deleteContent(item.id)}>Delete</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <Modal isOpen={isModalOpen} title="Add Content" onClose={() => setIsModalOpen(false)} onSave={saveContent}>
+                        <div className="form-group">
+                            <label className="form-label">Title</label>
+                            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Platform</label>
+                            <select className="form-select" value={formData.platform} onChange={e => setFormData({...formData, platform: e.target.value})}>
+                                {platforms.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Target Date</label>
+                            <input className="form-input" type="date" value={formData.target_date} onChange={e => setFormData({...formData, target_date: e.target.value})} />
+                        </div>
+                    </Modal>
+                </div>
+            );
+        }
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('overview');
+            const [deals, setDeals] = useState([]);
+            const [agentGoals, setAgentGoals] = useState([]);
+            const [kpis, setKpis] = useState([]);
+            const [tasks, setTasks] = useState([]);
+            const [contentItems, setContentItems] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            const agents = ['Addison', 'Will', 'Ron', 'Zach', 'Zayra'];
+
+            useEffect(() => {
+                const fetchData = async () => {
+                    try {
+                        const [dealsRes, goalsRes, kpisRes, tasksRes, contentRes] = await Promise.all([
+                            supabase.from('deals').select('*').order('created_at', { ascending: false }),
+                            supabase.from('agent_goals').select('*'),
+                            supabase.from('kpis').select('*'),
+                            supabase.from('tasks').select('*').order('created_at', { ascending: false }),
+                            supabase.from('content').select('*').order('created_at', { ascending: false })
+                        ]);
+
+                        setDeals(dealsRes.data || []);
+                        setAgentGoals(goalsRes.data || []);
+                        setKpis(kpisRes.data || []);
+                        setTasks(tasksRes.data || []);
+                        setContentItems(contentRes.data || []);
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                fetchData();
+            }, []);
+
+            if (loading) {
+                return (
+                    <div className="app-container">
+                        <div className="loading">
+                            <div className="spinner"></div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app-container">
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="sidebar-logo">TCT</div>
+                            <div className="sidebar-subtitle">Team Command Center</div>
+                        </div>
+                        <div className="nav-items">
+                            <div className={`nav-item ${currentPage === 'overview' ? 'active' : ''}`} onClick={() => setCurrentPage('overview')}>
+                                <span className="nav-icon">🏠</span>
+                                <span className="nav-label">Overview</span>
+                            </div>
+                            <div className={`nav-item ${currentPage === 'deals' ? 'active' : ''}`} onClick={() => setCurrentPage('deals')}>
+                                <span className="nav-icon">💰</span>
+                                <span className="nav-label">Deals</span>
+                            </div>
+                            <div className={`nav-item ${currentPage === 'scoreboard' ? 'active' : ''}`} onClick={() => setCurrentPage('scoreboard')}>
+                                <span className="nav-icon">📈</span>
+                                <span className="nav-label">Scoreboard</span>
+                            </div>
+                            <div className={`nav-item ${currentPage === 'tasks' ? 'active' : ''}`} onClick={() => setCurrentPage('tasks')}>
+                                <span className="nav-icon">✅</span>
+                                <span className="nav-label">Tasks</span>
+                            </div>
+                            <div className={`nav-item ${currentPage === 'content' ? 'active' : ''}`} onClick={() => setCurrentPage('content')}>
+                                <span className="nav-icon">🎬</span>
+                                <span className="nav-label">Content</span>
+                            </div>
+                        </div>
+                        <div className="user-card">
+                            <div className="user-avatar">AC</div>
+                            <div className="user-info">
+                                <div className="user-name">Addison</div>
+                                <div className="user-role">Team Lead</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="main-content">
+                        <div className="page-header">
+                            <div className="page-title">
+                                {currentPage === 'overview' && 'Team Overview'}
+                                {currentPage === 'deals' && 'Transaction Pipeline'}
+                                {currentPage === 'scoreboard' && 'Agent Performance'}
+                                {currentPage === 'tasks' && 'Team Tasks'}
+                                {currentPage === 'content' && "Will's Content Pipeline"}
+                            </div>
+                        </div>
+
+                        {currentPage === 'overview' && <Overview deals={deals} agentGoals={agentGoals} kpis={kpis} agents={agents} />}
+                        {currentPage === 'deals' && <Deals deals={deals} setDeals={setDeals} agents={agents} />}
+                        {currentPage === 'scoreboard' && <Scoreboard kpis={kpis} setKpis={setKpis} agents={agents} deals={deals} agentGoals={agentGoals} />}
+                        {currentPage === 'tasks' && <Tasks tasks={tasks} setTasks={setTasks} agents={agents} />}
+                        {currentPage === 'content' && <Content contentItems={contentItems} setContentItems={setContentItems} />}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
