@@ -127,9 +127,9 @@
 <script type="text/babel">
 const { useState, useEffect, useCallback, useMemo } = React;
 
-// ─── Config ───
+// âââ Config âââ
 const SUPABASE_URL = 'https://idmxupicsrmbujtrgdrf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQwOTYsImV4cCI6MjA5MDE0MDA5Nn0.Jkft1J6fxAXFaEjjucYmVJJgvnmHFmsBHTDfJAOk1WQ';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzI5MzAsImV4cCI6MjA5MDIwODkzMH0.0CKwkwS7gmaY8s60bG8ekPaBdFWXFocil8UCaiAa1go';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const AGENTS = [
@@ -143,7 +143,7 @@ const AGENTS = [
 const STAGES = ['New Lead', 'Contacted', 'Showing', 'Under Contract', 'Pending', 'Closed', 'Lost'];
 const DEAL_SIDES = ['Buyer', 'Seller', 'Dual', 'Referral'];
 
-// ─── Login Screen ───
+// âââ Login Screen âââ
 function LoginScreen({ onLogin }) {
     const [selected, setSelected] = useState(null);
     const [pin, setPin] = useState(['', '', '', '']);
@@ -202,7 +202,7 @@ function LoginScreen({ onLogin }) {
                             ))}
                         </div>
                         {error && <div style={{color:'#ef4444',fontSize:'13px',marginBottom:'12px'}}>{error}</div>}
-                        <div style={{color:'#64748b',fontSize:'12px',cursor:'pointer'}} onClick={() => { setSelected(null); setPin(['','','','']); setError(''); }}>← Pick a different person</div>
+                        <div style={{color:'#64748b',fontSize:'12px',cursor:'pointer'}} onClick={() => { setSelected(null); setPin(['','','','']); setError(''); }}>â Pick a different person</div>
                     </>
                 )}
             </div>
@@ -210,7 +210,7 @@ function LoginScreen({ onLogin }) {
     );
 }
 
-// ─── Overview Page ───
+// âââ Overview Page âââ
 function OverviewPage({ deals, goals, kpis, currentUser }) {
     const closedDeals = deals.filter(d => d.stage === 'Closed');
     const activePipeline = deals.filter(d => d.stage !== 'Closed' && d.stage !== 'Lost');
@@ -311,7 +311,7 @@ function OverviewPage({ deals, goals, kpis, currentUser }) {
     );
 }
 
-// ─── Deals Page ───
+// âââ Deals Page âââ
 function DealsPage({ deals, setDeals, currentUser }) {
     const [showModal, setShowModal] = useState(false);
     const [editDeal, setEditDeal] = useState(null);
@@ -372,7 +372,7 @@ function DealsPage({ deals, setDeals, currentUser }) {
                                 <td>{d.side}</td>
                                 <td><span className={`badge ${stageBadge(d.stage)}`}>{d.stage}</span></td>
                                 <td>${(d.sale_price || 0).toLocaleString()}</td>
-                                <td>{d.close_date || '—'}</td>
+                                <td>{d.close_date || 'â'}</td>
                                 {isAdmin && <td><button className="btn btn-sm btn-outline" onClick={() => openEdit(d)}>Edit</button></td>}
                             </tr>
                         ))}
@@ -386,7 +386,7 @@ function DealsPage({ deals, setDeals, currentUser }) {
                     <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <div className="modal-title">{editDeal ? 'Edit Deal' : 'New Deal'}</div>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+                            <button className="modal-close" onClick={() => setShowModal(false)}>Ã</button>
                         </div>
                         <div className="form-row">
                             <div className="form-group"><label className="form-label">Address</label><input className="form-input" value={form.address||''} onChange={e => setForm({...form, address: e.target.value})} /></div>
@@ -436,7 +436,7 @@ function DealsPage({ deals, setDeals, currentUser }) {
     );
 }
 
-// ─── Scoreboard Page ───
+// âââ Scoreboard Page âââ
 function ScoreboardPage({ deals, kpis, goals }) {
     const [view, setView] = useState('ratios');
     const now = new Date();
@@ -464,7 +464,7 @@ function ScoreboardPage({ deals, kpis, goals }) {
         });
 
         let coachTip = '';
-        if (parseFloat(callToContact) < 5) coachTip = `${agent.name}'s call-to-contact rate is low (${callToContact}%). Focus on call quality — scripts, timing, and tonality.`;
+        if (parseFloat(callToContact) < 5) coachTip = `${agent.name}'s call-to-contact rate is low (${callToContact}%). Focus on call quality â scripts, timing, and tonality.`;
         else if (parseFloat(contactToAppt) < 10) coachTip = `${agent.name} is making contacts but not enough appointments (${contactToAppt}%). Work on the appointment-setting pitch.`;
         else if (totalContracts > 0 && agentDeals.length === 0) coachTip = `${agent.name} has contracts but no closings yet. Focus on getting deals to the finish line.`;
         else if (agentDeals.length > 0) coachTip = `${agent.name} is converting well! Keep the momentum going.`;
@@ -491,8 +491,8 @@ function ScoreboardPage({ deals, kpis, goals }) {
                         <div className="ratio-item"><div className="ratio-value" style={{color:'#3b82f6'}}>{ad.totalAppts}</div><div className="ratio-label">Appts</div></div>
                         <div className="ratio-item"><div className="ratio-value" style={{color:'#22c55e'}}>{ad.totalContracts}</div><div className="ratio-label">Contracts</div></div>
                         <div className="ratio-item"><div className="ratio-value" style={{color:'#eab308'}}>{ad.closedDeals}</div><div className="ratio-label">Closed</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#a855f7'}}>{ad.callToContact}%</div><div className="ratio-label">Call→Contact</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#ec4899'}}>{ad.contactToAppt}%</div><div className="ratio-label">Contact→Appt</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#a855f7'}}>{ad.callToContact}%</div><div className="ratio-label">CallâContact</div></div>
+                        <div className="ratio-item"><div className="ratio-value" style={{color:'#ec4899'}}>{ad.contactToAppt}%</div><div className="ratio-label">ContactâAppt</div></div>
                     </div>
                     {ad.coachTip && <div className="coaching-tip"><strong>Coaching:</strong> {ad.coachTip}</div>}
                 </div>
@@ -500,7 +500,7 @@ function ScoreboardPage({ deals, kpis, goals }) {
 
             {view === 'trending' && agentData.map(ad => (
                 <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
-                    <h4 style={{color: ad.agent.color, marginBottom:'12px'}}>{ad.agent.name} — Monthly Calls</h4>
+                    <h4 style={{color: ad.agent.color, marginBottom:'12px'}}>{ad.agent.name} â Monthly Calls</h4>
                     <div style={{display:'flex',alignItems:'end',gap:'6px',height:'80px'}}>
                         {ad.monthlyData.map((m, i) => {
                             const max = Math.max(...ad.monthlyData.map(x => x.calls), 1);
@@ -538,13 +538,13 @@ function ScoreboardPage({ deals, kpis, goals }) {
                         <tbody>
                             {[...agentData].sort((a, b) => b.volume - a.volume).map((ad, i) => (
                                 <tr key={ad.agent.name}>
-                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? 'ð¥' : i === 1 ? 'ð¥' : i === 2 ? 'ð¥' : i + 1}</td>
                                     <td style={{color: ad.agent.color, fontWeight:600}}>{ad.agent.name}</td>
                                     <td>{ad.closedDeals}</td>
                                     <td>${(ad.volume/1000).toFixed(0)}K</td>
                                     <td>{ad.totalCalls}</td>
                                     <td>{ad.totalAppts}</td>
-                                    <td>{ad.goal > 0 ? ((ad.volume / ad.goal) * 100).toFixed(0) + '%' : '—'}</td>
+                                    <td>{ad.goal > 0 ? ((ad.volume / ad.goal) * 100).toFixed(0) + '%' : 'â'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -555,7 +555,7 @@ function ScoreboardPage({ deals, kpis, goals }) {
     );
 }
 
-// ─── Tasks Page ───
+// âââ Tasks Page âââ
 function TasksPage({ tasks, setTasks, currentUser }) {
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({});
@@ -621,7 +621,7 @@ function TasksPage({ tasks, setTasks, currentUser }) {
                     <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <div className="modal-title">Assign New Task</div>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+                            <button className="modal-close" onClick={() => setShowModal(false)}>Ã</button>
                         </div>
                         <div className="form-group"><label className="form-label">Task Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
                         <div className="form-row">
@@ -651,7 +651,7 @@ function TasksPage({ tasks, setTasks, currentUser }) {
     );
 }
 
-// ─── Content Page ───
+// âââ Content Page âââ
 function ContentPage({ content, setContent, currentUser }) {
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({});
@@ -682,7 +682,7 @@ function ContentPage({ content, setContent, currentUser }) {
                                 <td style={{fontWeight:500}}>{c.title}</td>
                                 <td>{c.platform}</td>
                                 <td><span className={`badge ${c.stage === 'Published' ? 'badge-green' : c.stage === 'Scheduled' ? 'badge-blue' : 'badge-gray'}`}>{c.stage}</span></td>
-                                <td>{c.target_date || '—'}</td>
+                                <td>{c.target_date || 'â'}</td>
                             </tr>
                         ))}
                         {content.length === 0 && <tr><td colSpan={4} className="empty-state">No content items yet</td></tr>}
@@ -693,7 +693,7 @@ function ContentPage({ content, setContent, currentUser }) {
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header"><div className="modal-title">New Content</div><button className="modal-close" onClick={() => setShowModal(false)}>×</button></div>
+                        <div className="modal-header"><div className="modal-title">New Content</div><button className="modal-close" onClick={() => setShowModal(false)}>Ã</button></div>
                         <div className="form-group"><label className="form-label">Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
                         <div className="form-row">
                             <div className="form-group"><label className="form-label">Platform</label>
@@ -717,7 +717,7 @@ function ContentPage({ content, setContent, currentUser }) {
     );
 }
 
-// ─── Main App ───
+// âââ Main App âââ
 function App() {
     const [currentUser, setCurrentUser] = useState(null);
     const [page, setPage] = useState('overview');
@@ -751,11 +751,11 @@ function App() {
     if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
 
     const pages = [
-        { id: 'overview', label: 'Overview', icon: '📊' },
-        { id: 'deals', label: 'Deals', icon: '🏠' },
-        { id: 'scoreboard', label: 'Scoreboard', icon: '🏆' },
-        { id: 'tasks', label: 'Tasks', icon: '✅' },
-        { id: 'content', label: 'Content', icon: '📱' },
+        { id: 'overview', label: 'Overview', icon: 'ð' },
+        { id: 'deals', label: 'Deals', icon: 'ð ' },
+        { id: 'scoreboard', label: 'Scoreboard', icon: 'ð' },
+        { id: 'tasks', label: 'Tasks', icon: 'â' },
+        { id: 'content', label: 'Content', icon: 'ð±' },
     ];
 
     const pendingTasks = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
