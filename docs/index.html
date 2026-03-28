@@ -9,894 +9,1622 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #0f1117; color: #e2e8f0; overflow: hidden; }
-        .app-container { display: flex; height: 100vh; }
-        .sidebar { width: 220px; background: #1a1d27; border-right: 1px solid #2a2d3a; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .sidebar-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #2a2d3a; }
-        .sidebar-logo { font-size: 22px; font-weight: bold; color: #6366f1; margin-bottom: 4px; }
-        .sidebar-subtitle { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .nav-items { flex: 1; margin-bottom: 20px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; color: #94a3b8; transition: all 0.2s ease; white-space: nowrap; }
-        .nav-item:hover { background: #22253a; color: #e2e8f0; }
-        .nav-item.active { background: rgba(99,102,241,0.15); color: #6366f1; }
-        .nav-icon { font-size: 20px; flex-shrink: 0; }
-        .nav-label { font-size: 14px; }
-        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: #22253a; border-radius: 8px; border: 1px solid #2a2d3a; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #6366f1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
-        .user-info { flex: 1; }
-        .user-name { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-        .user-role { font-size: 11px; color: #64748b; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .page-header { padding: 24px; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; justify-content: space-between; }
-        .page-title { font-size: 24px; font-weight: 600; }
-        .page-content { flex: 1; overflow-y: auto; padding: 24px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 20px; transition: all 0.2s ease; }
-        .stat-card:hover { background: #22253a; border-color: #3a3d4a; }
-        .stat-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .stat-value { font-size: 28px; font-weight: bold; color: #e2e8f0; margin-bottom: 8px; }
-        .stat-subtext { font-size: 12px; color: #64748b; }
-        .progress-bar { width: 100%; height: 6px; background: #2a2d3a; border-radius: 3px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8); transition: width 0.3s ease; }
-        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #e2e8f0; }
-        .card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
-        .agent-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-        .agent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .agent-name { font-size: 16px; font-weight: 600; }
-        .agent-goal { font-size: 13px; color: #94a3b8; }
-        .agent-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .agent-stat { text-align: center; }
-        .agent-stat-value { font-size: 18px; font-weight: bold; color: #e2e8f0; }
-        .agent-stat-label { font-size: 11px; color: #64748b; margin-top: 2px; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2a2d3a; background: #1a1d27; position: sticky; top: 0; }
-        td { padding: 12px; font-size: 13px; border-bottom: 1px solid #1e2130; }
-        tr:hover { background: rgba(99,102,241,0.05); }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-        .badge-green { background: rgba(34,197,94,0.15); color: #22c55e; }
-        .badge-blue { background: rgba(59,130,246,0.15); color: #3b82f6; }
-        .badge-yellow { background: rgba(234,179,8,0.15); color: #eab308; }
-        .badge-red { background: rgba(239,68,68,0.15); color: #ef4444; }
-        .badge-purple { background: rgba(168,85,247,0.15); color: #a855f7; }
-        .badge-gray { background: rgba(148,163,184,0.15); color: #94a3b8; }
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: #6366f1; color: white; }
-        .btn-primary:hover { background: #5558e6; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; }
-        .btn-outline { background: transparent; border: 1px solid #2a2d3a; color: #e2e8f0; }
-        .btn-outline:hover { background: #22253a; }
-        .btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
-        .btn-danger:hover { background: rgba(239,68,68,0.25); }
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; background: #22253a; border: 1px solid #2a2d3a; border-radius: 6px; color: #e2e8f0; font-size: 13px; outline: none; }
-        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #6366f1; }
-        .form-textarea { min-height: 80px; resize: vertical; font-family: inherit; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 12px; padding: 24px; width: 600px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { cursor: pointer; font-size: 20px; color: #94a3b8; background: none; border: none; }
-        .login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: #0f1117; }
-        .login-box { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 16px; padding: 40px; width: 400px; text-align: center; }
-        .login-logo { font-size: 36px; font-weight: bold; color: #6366f1; margin-bottom: 8px; }
-        .login-sub { font-size: 14px; color: #64748b; margin-bottom: 30px; }
-        .pin-input { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; }
-        .pin-digit { width: 50px; height: 60px; background: #22253a; border: 2px solid #2a2d3a; border-radius: 10px; text-align: center; font-size: 24px; font-weight: bold; color: #e2e8f0; outline: none; }
-        .pin-digit:focus { border-color: #6366f1; }
-        .agent-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
-        .agent-option { padding: 12px 8px; background: #22253a; border: 2px solid #2a2d3a; border-radius: 8px; cursor: pointer; text-align: center; font-size: 13px; color: #94a3b8; transition: all 0.2s; }
-        .agent-option:hover { border-color: #6366f1; color: #e2e8f0; }
-        .agent-option.selected { border-color: #6366f1; background: rgba(99,102,241,0.15); color: #6366f1; }
-        .ratio-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 8px; padding: 16px; }
-        .ratio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-        .ratio-item { text-align: center; padding: 12px; background: #22253a; border-radius: 8px; }
-        .ratio-value { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
-        .ratio-label { font-size: 11px; color: #64748b; }
-        .trend-bar { display: flex; align-items: end; gap: 4px; height: 60px; margin-top: 12px; }
-        .trend-col { flex: 1; background: rgba(99,102,241,0.3); border-radius: 3px 3px 0 0; transition: height 0.3s; min-height: 4px; }
-        .trend-col.current { background: #6366f1; }
-        .notification-badge { background: #ef4444; color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1e2130; }
-        .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #6366f1; margin-top: 5px; flex-shrink: 0; }
-        .timeline-content { flex: 1; }
-        .timeline-date { font-size: 11px; color: #64748b; }
-        .timeline-text { font-size: 13px; color: #e2e8f0; margin-top: 2px; }
-        .coaching-tip { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 14px; margin-top: 12px; font-size: 13px; color: #c7d2fe; }
-        .coaching-tip strong { color: #a5b4fc; }
-        .empty-state { text-align: center; padding: 40px; color: #64748b; }
-        .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; background: #1a1d27; padding: 4px; border-radius: 8px; border: 1px solid #2a2d3a; }
-        .tab-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; color: #94a3b8; transition: all 0.2s; }
-        .tab-item.active { background: #6366f1; color: white; }
-        .logout-btn { margin-top: 12px; width: 100%; padding: 10px; background: transparent; border: 1px solid #2a2d3a; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 12px; transition: all 0.2s; }
-        .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
-        @media (max-width: 768px) {
-            .sidebar { width: 70px; padding: 12px; }
-            .nav-label, .sidebar-subtitle, .user-info { display: none; }
-            .stat-grid { grid-template-columns: 1fr 1fr; }
-            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0f1117;
+            color: #e6edf3;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: #0d1117;
+        }
+
+        .nav-item.active {
+            background: #0d1117;
+            border-left-color: #58a6ff;
+            color: #58a6ff;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #30363d;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #2ea043;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #0f1117;
+        }
+
+        .login-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .login-box p {
+            color: #8b949e;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #6e7681;
+        }
+
+        .login-btn,
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover,
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .btn-secondary {
+            background: #0d1117;
+            color: #58a6ff;
+            border: 1px solid #30363d;
+        }
+
+        .btn-secondary:hover {
+            background: #161b22;
+         border-color: #58a6ff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: #8b949e;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #58a6ff;
+        }
+
+        .table-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-controls select {
+            padding: 6px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background: #0d1117;
+            color: #e6edf3;
+            font-size: 13px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #0d1117;
+            border-bottom: 1px solid #30363d;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #8b949e;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        tbody tr:hover {
+            background: #0d1117;
+        }
+
+        .table-scrollable {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .modal-buttons .btn-primary {
+            width: auto;
+            background: #238636;
+            color: white;
+            border: none;
+        }
+
+        .modal-buttons .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .modal-buttons .btn-secondary {
+            width: auto;
+            background: transparent;
+            color: #58a6ff;
+        }
+
+        .modal-buttons .btn-secondary:hover {
+            background: #0d1117;
+        }
+
+        .error-message {
+            color: #f85149;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .success-message {
+            background: #238636;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .trending-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .trending-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .trending-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #58a6ff;
+        }
+
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .trending-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .trending-card h4 {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trending-comparison {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .trending-year {
+            flex: 1;
+            text-align: center;
+        }
+
+        .trending-year-label {
+            font-size: 11px;
+            color: #6e7681;
+            margin-bottom: 4px;
+        }
+
+        .trending-year-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #58a6ff;
+        }
+
+        .progress-bar {
+            background: #30363d;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58a6ff 0%, #79c0ff 100%);
+            border-radius: 2px;
+        }
+
+        .agent-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .agent-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .agent-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #e6edf3;
+        }
+
+        .agent-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .agent-metric-label {
+            color: #8b949e;
+        }
+
+        .agent-metric-values {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .metric-year {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .metric-year-label {
+            font-size: 10px;
+            color: #6e7681;
+            display: block;
+        }
+
+        .metric-year-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #58a6ff;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .metric-change.positive {
+            color: #3fb950;
+        }
+
+        .metric-change.negative {
+            color: #f85149;
+        }
+
+        .metric-change.neutral {
+            color: #8b949e;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+
+        .spinner {
+            border: 2px solid #30363d;
+            border-top: 2px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #e6edf3;
+        }
+
+        .security-info {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .security-info strong {
+            color: #e6edf3;
         }
     </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useCallback, useMemo } = React;
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createClient } = supabase;
 
-// âââ Config âââ
-const SUPABASE_URL = 'https://idmxupicsrmbujtrgdrf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzI5MzAsImV4cCI6MjA5MDIwODkzMH0.0CKwkwS7gmaY8s60bG8ekPaBdFWXFocil8UCaiAa1go';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://idmxupicsrmbujtrgdrf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbXh1cGljc3JtYnVqdHJnZHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzI5MzAsImV4cCI6MjA5MDIwODkzMH0.0CKwkwS7gmaY8s60bG8ekPaBdFWXFocil8UCaiAa1go';
 
-const AGENTS = [
-    { name: 'Addison', fullName: 'Addison Corbin', role: 'Team Lead', pin: '1234', phone: '678-817-8167', fubId: 1, color: '#6366f1' },
-    { name: 'Will', fullName: 'William Nix', role: 'Agent', pin: '2345', phone: '4702576113', fubId: 3, color: '#3b82f6' },
-    { name: 'Ron', fullName: 'Ron Corbin', role: 'Agent', pin: '3456', phone: '7702941317', fubId: 9, color: '#22c55e' },
-    { name: 'Zach', fullName: 'Zach Joiner', role: 'Agent', pin: '4567', phone: '4788414010', fubId: 30, color: '#eab308' },
-    { name: 'Zayra', fullName: 'Zayra (Admin)', role: 'Admin', pin: '5678', phone: '6784720683', fubId: 35, color: '#a855f7' },
-];
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const STAGES = ['New Lead', 'Contacted', 'Showing', 'Under Contract', 'Pending', 'Closed', 'Lost'];
-const DEAL_SIDES = ['Buyer', 'Seller', 'Dual', 'Referral'];
+        // Main App Component
+        function App() {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [currentPage, setCurrentPage] = useState('dashboard');
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
 
-// âââ Login Screen âââ
-function LoginScreen({ onLogin }) {
-    const [selected, setSelected] = useState(null);
-    const [pin, setPin] = useState(['', '', '', '']);
-    const [error, setError] = useState('');
-    const refs = [React.createRef(), React.createRef(), React.createRef(), React.createRef()];
+            useEffect(() => {
+                // Check if user is logged in
+                checkAuth();
+            }, []);
 
-    const handlePinChange = (idx, val) => {
-        if (val.length > 1) val = val.slice(-1);
-        if (val && !/^\d$/.test(val)) return;
-        const newPin = [...pin];
-        newPin[idx] = val;
-        setPin(newPin);
-        setError('');
-        if (val && idx < 3) refs[idx + 1].current?.focus();
-        if (newPin.every(d => d !== '')) {
-            const entered = newPin.join('');
-            const agent = AGENTS.find(a => a.name === selected);
-            if (agent && agent.pin === entered) {
-                onLogin(agent);
-            } else {
-                setError('Wrong PIN');
-                setTimeout(() => { setPin(['', '', '', '']); refs[0].current?.focus(); }, 500);
+            async function checkAuth() {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session?.user) {
+                        setUser(session.user);
+                    }
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                } finally {
+                    setLoading(false);
+                }
             }
-        }
-    };
 
-    const handleKeyDown = (idx, e) => {
-        if (e.key === 'Backspace' && !pin[idx] && idx > 0) refs[idx - 1].current?.focus();
-    };
+            async function handleLogin(e) {
+                e.preventDefault();
+                setLoginError('');
 
-    return (
-        <div className="login-screen">
-            <div className="login-box">
-                <div className="login-logo">TCT</div>
-                <div className="login-sub">Team Command Center</div>
-                {!selected ? (
-                    <>
-                        <div style={{fontSize:'14px',color:'#94a3b8',marginBottom:'16px'}}>Who's logging in?</div>
-                        <div className="agent-select">
-                            {AGENTS.map(a => (
-                                <div key={a.name} className="agent-option" onClick={() => { setSelected(a.name); setTimeout(() => refs[0].current?.focus(), 100); }}>
-                                    <div style={{fontSize:'24px',marginBottom:'4px'}}>{a.name[0]}</div>
-                                    <div>{a.name}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div style={{fontSize:'14px',color:'#94a3b8',marginBottom:'6px'}}>Enter PIN for</div>
-                        <div style={{fontSize:'20px',fontWeight:'bold',marginBottom:'20px',color:'#6366f1'}}>{selected}</div>
-                        <div className="pin-input">
-                            {pin.map((d, i) => (
-                                <input key={i} ref={refs[i]} className="pin-digit" type="password" maxLength="1" value={d}
-                                    onChange={e => handlePinChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} />
-                            ))}
-                        </div>
-                        {error && <div style={{color:'#ef4444',fontSize:'13px',marginBottom:'12px'}}>{error}</div>}
-                        <div style={{color:'#64748b',fontSize:'12px',cursor:'pointer'}} onClick={() => { setSelected(null); setPin(['','','','']); setError(''); }}>â Pick a different person</div>
-                    </>
-                )}
-            </div>
-        </div>
-    );
-}
+                // Basic validation
+                if (!email || !password) {
+                    setLoginError('Please enter both email and password');
+                    return;
+                }
 
-// âââ Overview Page âââ
-function OverviewPage({ deals, goals, kpis, currentUser }) {
-    const closedDeals = deals.filter(d => d.stage === 'Closed');
-    const activePipeline = deals.filter(d => d.stage !== 'Closed' && d.stage !== 'Lost');
-    const totalClosed = closedDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
-    const totalGCI = closedDeals.reduce((s, d) => s + (d.team_gross || 0), 0);
-    const teamGoal = goals.reduce((s, g) => s + (g.annual_goal || 0), 0);
-    const pctToGoal = teamGoal > 0 ? ((totalClosed / teamGoal) * 100).toFixed(1) : 0;
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    setLoginError('Please enter a valid email address');
+                    return;
+                }
 
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const now = new Date();
-    const currentMonth = now.getMonth();
+                try {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: email.trim(),
+                        password
+                    });
 
-    const monthlyClosings = months.map((m, i) => {
-        const mc = closedDeals.filter(d => {
-            const cd = new Date(d.close_date);
-            return cd.getMonth() === i && cd.getFullYear() === now.getFullYear();
-        });
-        return { month: m, count: mc.length, volume: mc.reduce((s, d) => s + (d.sale_price || 0), 0) };
-    });
+                    if (error) throw error;
+                    if (data.user) {
+                        setUser(data.user);
+                        setEmail('');
+                        setPassword('');
+                    }
+                } catch (error) {
+                    setLoginError(error.message || 'Login failed. Please check your credentials.');
+                    console.error('Login error:', error);
+                }
+            }
 
-    return (
-        <>
-            <div className="stat-grid">
-                <div className="stat-card">
-                    <div className="stat-label">Closed Volume (YTD)</div>
-                    <div className="stat-value">${(totalClosed/1000000).toFixed(2)}M</div>
-                    <div className="stat-subtext">{pctToGoal}% to team goal</div>
-                    <div className="progress-bar"><div className="progress-fill" style={{width: Math.min(pctToGoal, 100) + '%'}}></div></div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Team GCI</div>
-                    <div className="stat-value">${(totalGCI/1000000).toFixed(2)}M</div>
-                    <div className="stat-subtext">{closedDeals.length} deals closed</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Active Pipeline</div>
-                    <div className="stat-value">${(activePipeline.reduce((s,d) => s + (d.sale_price||0), 0)/1000000).toFixed(2)}M</div>
-                    <div className="stat-subtext">{activePipeline.length} deals in pipeline</div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-label">Units Closed</div>
-                    <div className="stat-value">{closedDeals.length}</div>
-                    <div className="stat-subtext">Team goal: {goals.length} agents active</div>
-                </div>
-            </div>
+            async function handleLogout() {
+                try {
+                    await supabaseClient.auth.signOut();
+                    setUser(null);
+                    setCurrentPage('dashboard');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
 
-            <h3 className="section-title">Agent Performance (YTD)</h3>
-            {AGENTS.filter(a => a.role !== 'Admin').map(agent => {
-                const goal = goals.find(g => g.agent === agent.name);
-                const annualGoal = goal?.annual_goal || 0;
-                const agentDeals = closedDeals.filter(d => d.agent === agent.name);
-                const agentVol = agentDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
-                const pct = annualGoal > 0 ? ((agentVol / annualGoal) * 100).toFixed(0) : 0;
-                const gap = annualGoal - agentVol;
-                const agentKpis = kpis.filter(k => k.agent === agent.name && k.year === now.getFullYear());
-                const totalCalls = agentKpis.reduce((s, k) => s + (k.calls || 0), 0);
-
+            if (loading) {
                 return (
-                    <div key={agent.name} className="agent-card">
-                        <div className="agent-header">
-                            <div>
-                                <h4 className="agent-name" style={{color: agent.color}}>{agent.name}</h4>
-                                <div className="agent-goal">Goal: ${(annualGoal/1000000).toFixed(1)}M</div>
-                            </div>
-                            <div style={{textAlign:'right'}}>
-                                <div style={{fontSize:'14px',fontWeight:'bold'}}>{pct}% to goal</div>
-                                <div style={{fontSize:'12px',color:'#64748b'}}>Gap: ${(gap/1000000).toFixed(1)}M</div>
-                            </div>
-                        </div>
-                        <div className="progress-bar" style={{marginBottom:'12px'}}><div className="progress-fill" style={{width: Math.min(pct, 100) + '%', background: agent.color}}></div></div>
-                        <div className="agent-stats">
-                            <div className="agent-stat"><div className="agent-stat-value">{agentDeals.length}</div><div className="agent-stat-label">Units</div></div>
-                            <div className="agent-stat"><div className="agent-stat-value">${(agentVol/1000000).toFixed(2)}M</div><div className="agent-stat-label">Volume</div></div>
-                            <div className="agent-stat"><div className="agent-stat-value">{totalCalls}</div><div className="agent-stat-label">Calls</div></div>
-                            <div className="agent-stat"><div className="agent-stat-value">${(gap/1000000).toFixed(1)}M</div><div className="agent-stat-label">Gap</div></div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0f1117' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div className="spinner"></div>
+                            <p style={{ color: '#8b949e' }}>Loading...</p>
                         </div>
                     </div>
                 );
-            })}
+            }
 
-            <h3 className="section-title" style={{marginTop:'24px'}}>Monthly Closings</h3>
-            <div className="card">
-                <div style={{display:'flex',gap:'8px',alignItems:'end',height:'120px'}}>
-                    {monthlyClosings.map((m, i) => {
-                        const maxVol = Math.max(...monthlyClosings.map(x => x.volume), 1);
-                        const h = (m.volume / maxVol) * 100;
-                        return (
-                            <div key={m.month} style={{flex:1,textAlign:'center'}}>
-                                <div style={{fontSize:'11px',color:'#e2e8f0',marginBottom:'4px'}}>{m.count > 0 ? m.count : ''}</div>
-                                <div style={{height: Math.max(h, 4) + 'px', background: i === currentMonth ? '#6366f1' : 'rgba(99,102,241,0.3)', borderRadius:'3px 3px 0 0', transition:'height 0.3s'}}></div>
-                                <div style={{fontSize:'10px',color:'#64748b',marginTop:'4px'}}>{m.month}</div>
+            if (!user) {
+                return <LoginPage onLogin={handleLogin} email={email} setEmail={setEmail} password={password} setPassword={setPassword} error={loginError} />;
+            }
+
+            return (
+                <AppLayout
+                    user={user}
+                    onLogout={handleLogout}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                />
+            );
+        }
+
+        // Login Page
+        function LoginPage({ onLogin, email, setEmail, password, setPassword, error }) {
+            return (
+                <div className="login-container">
+                    <div className="login-box">
+                        <h1>TCT Dashboard</h1>
+                        <p>Team Command Center for Real Estate</p>
+                        <form onSubmit={onLogin}>
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="your@email.com"
+                                />
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
-        </>
-    );
-}
-
-// âââ Deals Page âââ
-function DealsPage({ deals, setDeals, currentUser }) {
-    const [showModal, setShowModal] = useState(false);
-    const [editDeal, setEditDeal] = useState(null);
-    const [filter, setFilter] = useState('Active');
-    const [form, setForm] = useState({});
-
-    const filtered = filter === 'All' ? deals : filter === 'Active' ? deals.filter(d => d.stage !== 'Closed' && d.stage !== 'Lost') : deals.filter(d => d.stage === filter);
-
-    const openNew = () => { setForm({ agent: currentUser.name, side: 'Buyer', stage: 'New Lead', source: '' }); setEditDeal(null); setShowModal(true); };
-    const openEdit = (d) => { setForm({...d}); setEditDeal(d); setShowModal(true); };
-
-    const saveDeal = async () => {
-        const data = {
-            address: form.address || '', client: form.client || '', agent: form.agent || '', side: form.side || 'Buyer',
-            stage: form.stage || 'New Lead', sale_price: parseFloat(form.sale_price) || 0, gross_commission: parseFloat(form.gross_commission) || 0,
-            team_gross: parseFloat(form.team_gross) || 0, split: form.split || '', source: form.source || '', lender: form.lender || '',
-            binding_date: form.binding_date || null, close_date: form.close_date || null, due_diligence: form.due_diligence || null,
-            financing_contingency: form.financing_contingency || null, updated_at: new Date().toISOString()
-        };
-        if (editDeal) {
-            const { error } = await sb.from('deals').update(data).eq('id', editDeal.id);
-            if (!error) { setDeals(prev => prev.map(d => d.id === editDeal.id ? {...d, ...data} : d)); }
-        } else {
-            const { data: nd, error } = await sb.from('deals').insert(data).select();
-            if (!error && nd) setDeals(prev => [...prev, nd[0]]);
-        }
-        setShowModal(false);
-    };
-
-    const deleteDeal = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this deal? This cannot be undone.')) return;
-        const { error } = await sb.from('deals').delete().eq('id', id);
-        if (!error) setDeals(prev => prev.filter(d => d.id !== id));
-    };
-
-    const stageBadge = (stage) => {
-        const map = { 'Closed': 'badge-green', 'Under Contract': 'badge-blue', 'Pending': 'badge-yellow', 'Lost': 'badge-red', 'New Lead': 'badge-purple', 'Showing': 'badge-blue' };
-        return map[stage] || 'badge-gray';
-    };
-
-    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
-
-    return (
-        <>
-            <div style={{display:'flex',gap:'8px',marginBottom:'20px',flexWrap:'wrap',alignItems:'center'}}>
-                {['Active','All','Under Contract','Pending','Closed','Lost'].map(f => (
-                    <div key={f} className={`tab-item ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>{f}</div>
-                ))}
-                <div style={{flex:1}}></div>
-                {isAdmin && <button className="btn btn-primary" onClick={openNew}>+ New Deal</button>}
-            </div>
-            <div className="table-container">
-                <table>
-                    <thead><tr>
-                        <th>Address</th><th>Client</th><th>Agent</th><th>Side</th><th>Stage</th><th>Price</th><th>Close Date</th>
-                        {isAdmin && <th>Actions</th>}
-                    </tr></thead>
-                    <tbody>
-                        {filtered.map(d => (
-                            <tr key={d.id}>
-                                <td style={{fontWeight:500}}>{d.address}</td>
-                                <td>{d.client}</td>
-                                <td>{d.agent}</td>
-                                <td>{d.side}</td>
-                                <td><span className={`badge ${stageBadge(d.stage)}`}>{d.stage}</span></td>
-                                <td>${(d.sale_price || 0).toLocaleString()}</td>
-                                <td>{d.close_date || 'â'}</td>
-                                {isAdmin && <td style={{display:'flex',gap:'6px'}}><button className="btn btn-sm btn-outline" onClick={() => openEdit(d)}>Edit</button><button className="btn btn-sm btn-danger" onClick={() => deleteDeal(d.id)}>Del</button></td>}
-                            </tr>
-                        ))}
-                        {filtered.length === 0 && <tr><td colSpan={isAdmin ? 8 : 7} className="empty-state">No deals found</td></tr>}
-                    </tbody>
-                </table>
-            </div>
-
-            {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="modal-title">{editDeal ? 'Edit Deal' : 'New Deal'}</div>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>Ã</button>
-                        </div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Address</label><input className="form-input" value={form.address||''} onChange={e => setForm({...form, address: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Client Name</label><input className="form-input" value={form.client||''} onChange={e => setForm({...form, client: e.target.value})} /></div>
-                        </div>
-                        <div className="form-row-3">
-                            <div className="form-group"><label className="form-label">Agent</label>
-                                <select className="form-select" value={form.agent||''} onChange={e => setForm({...form, agent: e.target.value})}>
-                                    {AGENTS.filter(a=>a.role!=='Admin').map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
-                                </select></div>
-                            <div className="form-group"><label className="form-label">Side</label>
-                                <select className="form-select" value={form.side||'Buyer'} onChange={e => setForm({...form, side: e.target.value})}>
-                                    {DEAL_SIDES.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select></div>
-                            <div className="form-group"><label className="form-label">Stage</label>
-                                <select className="form-select" value={form.stage||'New Lead'} onChange={e => setForm({...form, stage: e.target.value})}>
-                                    {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select></div>
-                        </div>
-                        <div className="form-row-3">
-                            <div className="form-group"><label className="form-label">Sale Price</label><input className="form-input" type="number" value={form.sale_price||''} onChange={e => setForm({...form, sale_price: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Gross Commission</label><input className="form-input" type="number" value={form.gross_commission||''} onChange={e => setForm({...form, gross_commission: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Team Gross</label><input className="form-input" type="number" value={form.team_gross||''} onChange={e => setForm({...form, team_gross: e.target.value})} /></div>
-                        </div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Source</label><input className="form-input" value={form.source||''} onChange={e => setForm({...form, source: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Lender</label><input className="form-input" value={form.lender||''} onChange={e => setForm({...form, lender: e.target.value})} /></div>
-                        </div>
-                        <div style={{marginTop:'8px',marginBottom:'12px',fontWeight:600,color:'#94a3b8',fontSize:'12px',textTransform:'uppercase',letterSpacing:'0.5px'}}>Contract Dates</div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Binding Date</label><input className="form-input" type="date" value={form.binding_date||''} onChange={e => setForm({...form, binding_date: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Close Date</label><input className="form-input" type="date" value={form.close_date||''} onChange={e => setForm({...form, close_date: e.target.value})} /></div>
-                        </div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Due Diligence End</label><input className="form-input" type="date" value={form.due_diligence||''} onChange={e => setForm({...form, due_diligence: e.target.value})} /></div>
-                            <div className="form-group"><label className="form-label">Financing Contingency</label><input className="form-input" type="date" value={form.financing_contingency||''} onChange={e => setForm({...form, financing_contingency: e.target.value})} /></div>
-                        </div>
-                        <div className="form-group"><label className="form-label">Split / Notes</label><input className="form-input" value={form.split||''} onChange={e => setForm({...form, split: e.target.value})} /></div>
-                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
-                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={saveDeal}>{editDeal ? 'Save Changes' : 'Create Deal'}</button>
-                        </div>
+                            <div className="form-group">
+                                <label>Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                                />
+                            </div>
+                            {error && <div className="error-message">{error}</div>}
+                            <button type="submit" className="login-btn" style={{ marginTop: '16px' }}>Sign In</button>
+                        </form>
+                        <p style={{ marginTop: '16px', fontSize: '12px', color: '#6e7681', textAlign: 'center' }}>
+                            TCT Team Only - Contact Admin for Access
+                        </p>
                     </div>
                 </div>
-            )}
-        </>
-    );
-}
-
-// âââ Scoreboard Page âââ
-function ScoreboardPage({ deals, kpis, goals, setKpis, currentUser }) {
-    const [view, setView] = useState('ratios');
-    const [kpiForm, setKpiForm] = useState({ buyer_appts: '', listing_appts: '', offers_written: '' });
-    const [kpiSaving, setKpiSaving] = useState(false);
-    const [kpiMsg, setKpiMsg] = useState('');
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-    const agentData = AGENTS.filter(a => a.role !== 'Admin').map(agent => {
-        const agentKpis = kpis.filter(k => k.agent === agent.name && k.year === currentYear);
-        const totalCalls = agentKpis.reduce((s, k) => s + (k.calls || 0), 0);
-        const totalAppts = agentKpis.reduce((s, k) => s + (k.appointments || 0), 0);
-        const totalContracts = agentKpis.reduce((s, k) => s + (k.contracts || 0), 0);
-        const totalListings = agentKpis.reduce((s, k) => s + (k.listings || 0), 0);
-        const agentDeals = deals.filter(d => d.agent === agent.name && d.stage === 'Closed');
-        const activeContracts = deals.filter(d => d.agent === agent.name && (d.stage === 'Under Contract' || d.stage === 'Pending')).length;
-        const goal = goals.find(g => g.agent === agent.name)?.annual_goal || 0;
-        const volume = agentDeals.reduce((s, d) => s + (d.sale_price || 0), 0);
-
-        const callToAppt = totalCalls > 0 ? ((totalAppts / totalCalls) * 100).toFixed(1) : '0.0';
-        const apptToOffer = totalAppts > 0 ? ((totalContracts / totalAppts) * 100).toFixed(1) : '0.0';
-        const offerToContract = totalContracts > 0 ? (((agentDeals.length + activeContracts) / totalContracts) * 100).toFixed(1) : '0.0';
-        const contactToClose = totalAppts > 0 ? ((agentDeals.length / totalAppts) * 100).toFixed(1) : '0.0';
-
-        const monthlyData = months.map((m, i) => {
-            const mk = agentKpis.find(k => k.month === i + 1);
-            return { month: m, calls: mk?.calls || 0, appts: mk?.appointments || 0, contracts: mk?.contracts || 0, listings: mk?.listings || 0 };
-        });
-
-        let coachTip = '';
-        if (parseFloat(callToAppt) < 3) coachTip = `${agent.name}'s call-to-appointment rate is low (${callToAppt}%). Focus on call quality â scripts, timing, and tonality.`;
-        else if (parseFloat(apptToOffer) < 20) coachTip = `${agent.name} has appointments but low offer rate (${apptToOffer}%). Work on the consultation-to-offer conversion.`;
-        else if (totalContracts > 0 && agentDeals.length === 0) coachTip = `${agent.name} has offers written but no closings yet. Focus on getting deals to the finish line.`;
-        else if (agentDeals.length > 0) coachTip = `${agent.name} is converting well! Contact-to-close rate: ${contactToClose}%.`;
-
-        return { agent, totalCalls, totalAppts, totalContracts, totalListings, closedDeals: agentDeals.length, activeContracts, volume, goal, callToAppt, apptToOffer, offerToContract, contactToClose, monthlyData, coachTip };
-    });
-
-    const saveKpi = async () => {
-        const ba = parseInt(kpiForm.buyer_appts) || 0;
-        const la = parseInt(kpiForm.listing_appts) || 0;
-        const ow = parseInt(kpiForm.offers_written) || 0;
-        if (ba === 0 && la === 0 && ow === 0) { setKpiMsg('Enter at least one value.'); return; }
-        setKpiSaving(true);
-        setKpiMsg('');
-
-        const existing = kpis.find(k => k.agent === currentUser.name && k.month == currentMonth && k.year === currentYear);
-        if (existing) {
-            const updated = {
-                appointments: (existing.appointments || 0) + ba,
-                listings: (existing.listings || 0) + la,
-                contracts: (existing.contracts || 0) + ow,
-                updated_at: new Date().toISOString()
-            };
-            const { error } = await sb.from('kpis').update(updated).eq('id', existing.id);
-            if (!error) {
-                setKpis(prev => prev.map(k => k.id === existing.id ? {...k, ...updated} : k));
-                setKpiMsg('Added! Buyer appts: +' + ba + ', Listing appts: +' + la + ', Offers: +' + ow);
-            } else { setKpiMsg('Error saving: ' + error.message); }
-        } else {
-            const newRec = { agent: currentUser.name, month: currentMonth, year: currentYear, calls: 0, appointments: ba, listings: la, contracts: ow, updated_at: new Date().toISOString() };
-            const { data: nd, error } = await sb.from('kpis').insert(newRec).select();
-            if (!error && nd) {
-                setKpis(prev => [...prev, nd[0]]);
-                setKpiMsg('Created! Buyer appts: ' + ba + ', Listing appts: ' + la + ', Offers: ' + ow);
-            } else { setKpiMsg('Error saving: ' + (error?.message || 'unknown')); }
+            );
         }
-        setKpiForm({ buyer_appts: '', listing_appts: '', offers_written: '' });
-        setKpiSaving(false);
-    };
 
-    const currentKpi = kpis.find(k => k.agent === currentUser.name && k.month == currentMonth && k.year === currentYear);
-
-    return (
-        <>
-            <div className="tab-bar">
-                <div className={`tab-item ${view === 'input' ? 'active' : ''}`} onClick={() => setView('input')}>Daily Input</div>
-                <div className={`tab-item ${view === 'ratios' ? 'active' : ''}`} onClick={() => setView('ratios')}>Ratios & Coaching</div>
-                <div className={`tab-item ${view === 'trending' ? 'active' : ''}`} onClick={() => setView('trending')}>Monthly Trending</div>
-                <div className={`tab-item ${view === 'leaderboard' ? 'active' : ''}`} onClick={() => setView('leaderboard')}>Leaderboard</div>
-            </div>
-
-            {view === 'input' && (
-                <div className="card" style={{maxWidth:'600px'}}>
-                    <h4 style={{marginBottom:'4px'}}>Log Today's Activity</h4>
-                    <div style={{fontSize:'13px',color:'#64748b',marginBottom:'20px'}}>{now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} â {currentUser.name}</div>
-                    <div className="form-row-3">
-                        <div className="form-group">
-                            <label className="form-label">Buyer Appts</label>
-                            <input className="form-input" type="number" min="0" placeholder="0" value={kpiForm.buyer_appts} onChange={e => setKpiForm({...kpiForm, buyer_appts: e.target.value})} />
+        // App Layout
+        function AppLayout({ user, onLogout, currentPage, setCurrentPage }) {
+            return (
+                <div className="app-container">
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <h1>TCT Dashboard</h1>
+                            <p>Real Estate Team</p>
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Listing Appts</label>
-                            <input className="form-input" type="number" min="0" placeholder="0" value={kpiForm.listing_appts} onChange={e => setKpiForm({...kpiForm, listing_appts: e.target.value})} />
+                        <div className="sidebar-nav">
+                            <div
+                                className={`nav-item ${currentPage === 'dashboard' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('dashboard')}
+                            >
+                                Dashboard
+                            </div>
+                            <div
+                                className={`nav-item ${currentPage === 'deals' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('deals')}
+                            >
+                                Deals
+                            </div>
+                            <div
+                                className={`nav-item ${currentPage === 'trending' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('trending')}
+                            >
+                                Trending (YoY)
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Offers Written</label>
-                            <input className="form-input" type="number" min="0" placeholder="0" value={kpiForm.offers_written} onChange={e => setKpiForm({...kpiForm, offers_written: e.target.value})} />
+                        <div className="sidebar-footer">
+                            <p style={{ fontSize: '12px', marginBottom: '8px' }}>Logged in as:</p>
+                            <p style={{ fontSize: '12px', color: '#58a6ff', marginBottom: '12px' }}>{user.email}</p>
+                            <button className="logout-btn" onClick={onLogout}>Logout</button>
                         </div>
                     </div>
-                    <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
-                        <button className="btn btn-primary" onClick={saveKpi} disabled={kpiSaving}>{kpiSaving ? 'Saving...' : 'Log Activity'}</button>
-                        {kpiMsg && <div style={{fontSize:'13px',color: kpiMsg.startsWith('Error') ? '#ef4444' : '#22c55e'}}>{kpiMsg}</div>}
+                    <div className="main-content">
+                        {currentPage === 'dashboard' && <DashboardPage />}
+                        {currentPage === 'deals' && <DealsPage />}
+                        {currentPage === 'trending' && <TrendingPage />}
                     </div>
-                    {currentKpi && (
-                        <div style={{marginTop:'20px',padding:'16px',background:'#22253a',borderRadius:'8px'}}>
-                            <div style={{fontSize:'12px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'12px'}}>{months[currentMonth-1]} {currentYear} â Running Totals</div>
-                            <div className="ratio-grid">
-                                <div className="ratio-item"><div className="ratio-value" style={{color:'#6366f1',fontSize:'18px'}}>{currentKpi.calls || 0}</div><div className="ratio-label">Calls (FUB)</div></div>
-                                <div className="ratio-item"><div className="ratio-value" style={{color:'#3b82f6',fontSize:'18px'}}>{currentKpi.appointments || 0}</div><div className="ratio-label">Buyer Appts</div></div>
-                                <div className="ratio-item"><div className="ratio-value" style={{color:'#22c55e',fontSize:'18px'}}>{currentKpi.listings || 0}</div><div className="ratio-label">Listing Appts</div></div>
-                                <div className="ratio-item"><div className="ratio-value" style={{color:'#eab308',fontSize:'18px'}}>{currentKpi.contracts || 0}</div><div className="ratio-label">Offers Written</div></div>
+                </div>
+            );
+        }
+
+        // Dashboard Page
+        function DashboardPage() {
+            const [stats, setStats] = useState({ totalVolume: 0, totalDeals: 0, totalGCI: 0 });
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                loadStats();
+            }, []);
+
+            async function loadStats() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('deals')
+                        .select('sale_price, gross_commission');
+
+                    if (error) throw error;
+
+                    const totalVolume = data.reduce((sum, deal) => sum + (deal.sale_price || 0), 0);
+                    const totalGCI = data.reduce((sum, deal) => sum + (deal.gross_commission || 0), 0);
+
+                    setStats({
+                        totalVolume,
+                        totalDeals: data.length,
+                        totalGCI
+                    });
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            if (loading) {
+                return <div className="loading"><div className="spinner"></div>Loading dashboard...</div>;
+            }
+
+            return (
+                <>
+                    <div className="header">
+                        <h2>Dashboard</h2>
+                    </div>
+                    <div className="content">
+                        <div className="security-info">
+                            <strong>Security Notice:</strong> This dashboard uses Supabase's read-only anonymous key for client-side data access. All forms include input validation. The Supabase API is configured with Row Level Security (RLS) policies to control data access.
+                        </div>
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <h3>Total Volume</h3>
+                                <div className="value">${(stats.totalVolume / 1000000).toFixed(1)}M</div>
+                            </div>
+                            <div className="stat-card">
+                                <h3>Total Deals</h3>
+                                <div className="value">{stats.totalDeals}</div>
+                            </div>
+                            <div className="stat-card">
+                                <h3>Total GCI</h3>
+                                <div className="value">${(stats.totalGCI / 1000).toFixed(0)}K</div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        // Deals Page
+        function DealsPage() {
+            const [deals, setDeals] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [yearFilter, setYearFilter] = useState('all');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [successMessage, setSuccessMessage] = useState('');
+            const [formErrors, setFormErrors] = useState({});
+            const [formData, setFormData] = useState({
+                address: '',
+                client: '',
+                agent: '',
+                side: 'buy',
+                stage: 'open',
+                sale_price: '',
+                gross_commission: '',
+                team_gross: '',
+                split: '',
+                source: '',
+                lender: '',
+                binding_date: '',
+                close_date: '',
+                due_diligence: '',
+                financing_contingency: '',
+                closing_attorney: '',
+                earnest_money: '',
+                agent_commission: '',
+                fmls_fee: '',
+                team_split: '',
+                net_commission: '',
+                year: new Date().getFullYear(),
+                referral_paid: false,
+                handout: false
+            });
+
+            useEffect(() => {
+                loadDeals();
+            }, [yearFilter]);
+
+            async function loadDeals() {
+                try {
+                    setLoading(true);
+                    let query = supabaseClient.from('deals').select('*');
+
+                    if (yearFilter !== 'all') {
+                        query = query.eq('year', parseInt(yearFilter));
+                    }
+
+                    const { data, error } = await query;
+                    if (error) throw error;
+
+                    setDeals(data || []);
+                } catch (error) {
+                    console.error('Error loading deals:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            function validateForm() {
+                const errors = {};
+
+                if (!formData.address?.trim()) errors.address = 'Address is required';
+                if (!formData.client?.trim()) errors.client = 'Client name is required';
+                if (!formData.agent?.trim()) errors.agent = 'Agent is required';
+                if (formData.sale_price && isNaN(formData.sale_price)) errors.sale_price = 'Must be a number';
+                if (formData.gross_commission && isNaN(formData.gross_commission)) errors.gross_commission = 'Must be a number';
+                if (formData.team_gross && isNaN(formData.team_gross)) errors.team_gross = 'Must be a number';
+                if (formData.agent_commission && isNaN(formData.agent_commission)) errors.agent_commission = 'Must be a number';
+                if (formData.fmls_fee && isNaN(formData.fmls_fee)) errors.fmls_fee = 'Must be a number';
+                if (formData.team_split && isNaN(formData.team_split)) errors.team_split = 'Must be a number';
+                if (formData.net_commission && isNaN(formData.net_commission)) errors.net_commission = 'Must be a number';
+
+                setFormErrors(errors);
+                return Object.keys(errors).length === 0;
+            }
+
+            async function handleAddDeal(e) {
+                e.preventDefault();
+
+                if (!validateForm()) return;
+
+                try {
+                    const dealData = {
+                        ...formData,
+                        sale_price: formData.sale_price ? parseFloat(formData.sale_price) : null,
+                        gross_commission: formData.gross_commission ? parseFloat(formData.gross_commission) : null,
+                        team_gross: formData.team_gross ? parseFloat(formData.team_gross) : null,
+                        split: formData.split ? parseFloat(formData.split) : null,
+                        agent_commission: formData.agent_commission ? parseFloat(formData.agent_commission) : null,
+                        fmls_fee: formData.fmls_fee ? parseFloat(formData.fmls_fee) : null,
+                        team_split: formData.team_split ? parseFloat(formData.team_split) : null,
+                        net_commission: formData.net_commission ? parseFloat(formData.net_commission) : null,
+                        earnest_money: formData.earnest_money || null,
+                        binding_date: formData.binding_date || null,
+                        close_date: formData.close_date || null,
+                        due_diligence: formData.due_diligence || null,
+                        financing_contingency: formData.financing_contingency || null
+                    };
+
+                    const { error } = await supabaseClient.from('deals').insert([dealData]);
+
+                    if (error) throw error;
+
+                    setSuccessMessage('Deal added successfully!');
+                    setTimeout(() => setSuccessMessage(''), 3000);
+
+                    setFormData({
+                        address: '',
+                        client: '',
+                        agent: '',
+                        side: 'buy',
+                        stage: 'open',
+                        sale_price: '',
+                        gross_commission: '',
+                        team_gross: '',
+                        split: '',
+                        source: '',
+                        lender: '',
+                        binding_date: '',
+                        close_date: '',
+                        due_diligence: '',
+                        financing_contingency: '',
+                        closing_attorney: '',
+                        earnest_money: '',
+                        agent_commission: '',
+                        fmls_fee: '',
+                        team_split: '',
+                        net_commission: '',
+                        year: new Date().getFullYear(),
+                        referral_paid: false,
+                        handout: false
+                    });
+                    setFormErrors({});
+                    setShowAddModal(false);
+                    loadDeals();
+                } catch (error) {
+                    console.error('Error adding deal:', error);
+                    setFormErrors({ submit: error.message });
+                }
+            }
+
+            const filteredDeals = yearFilter === 'all' ? deals : deals.filter(d => d.year === parseInt(yearFilter));
+
+            return (
+                <>
+                    <div className="header">
+                        <h2>Deals</h2>
+                    </div>
+                    <div className="content">
+                        {successMessage && <div className="success-message">{successMessage}</div>}
+
+                        <div className="table-container">
+                            <div className="table-header">
+                                <h3>All Deals</h3>
+                                <div className="filter-controls">
+                                    <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+                                        <option value="all">All Years</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                    <button className="btn-primary" onClick={() => setShowAddModal(true)} style={{ width: 'auto', padding: '8px 16px' }}>
+                                        + Add Deal
+                                    </button>
+                                </div>
+                            </div>
+
+                            {loading ? (
+                                <div className="loading"><div className="spinner"></div>Loading deals...</div>
+                            ) : filteredDeals.length === 0 ? (
+                                <div className="empty-state">
+                                    <h3>No deals found</h3>
+                                    <p>Add your first deal to get started</p>
+                                </div>
+                            ) : (
+                                <div className="table-scrollable">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Address</th>
+                                                <th>Client</th>
+                                                <th>Agent</th>
+                                                <th>Side</th>
+                                                <th>Stage</th>
+                                                <th>Sale Price</th>
+                                                <th>Gross Commission</th>
+                                                <th>Team Gross</th>
+                                                <th>Agent Commission</th>
+                                                <th>FMLS Fee</th>
+                                                <th>Net Commission</th>
+                                                <th>Close Date</th>
+                                                <th>Year</th>
+                                                <th>Attorney</th>
+                                                <th>Earnest Money</th>
+                                                <th>Team Split</th>
+                                                <th>Referral Paid</th>
+                                                <th>Handout</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredDeals.map((deal) => (
+                                                <tr key={deal.id}>
+                                                    <td>{deal.address}</td>
+                                                    <td>{deal.client}</td>
+                                                    <td>{deal.agent}</td>
+                                                    <td>{deal.side}</td>
+                                                    <td>{deal.stage}</td>
+                                                    <td>${(deal.sale_price || 0).toLocaleString()}</td>
+                                                    <td>${(deal.gross_commission || 0).toLocaleString()}</td>
+                                                    <td>${(deal.team_gross || 0).toLocaleString()}</td>
+                                                    <td>${(deal.agent_commission || 0).toLocaleString()}</td>
+                                                    <td>${(deal.fmls_fee || 0).toLocaleString()}</td>
+                                                    <td>${(deal.net_commission || 0).toLocaleString()}</td>
+                                                    <td>{deal.close_date ? new Date(deal.close_date).toLocaleDateString() : '-'}</td>
+                                                    <td>{deal.year}</td>
+                                                    <td>{deal.closing_attorney || '-'}</td>
+                                                    <td>{deal.earnest_money ? new Date(deal.earnest_money).toLocaleDateString() : '-'}</td>
+                                                    <td>{deal.team_split ? `${deal.team_split}%` : '-'}</td>
+                                                    <td>{deal.referral_paid ? 'Yes' : 'No'}</td>
+                                                    <td>{deal.handout ? 'Yes' : 'No'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                </table>
+                              </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {showAddModal && (
+                        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <h2>Add New Deal</h2>
+                                <form onSubmit={handleAddDeal}>
+                                    {formErrors.submit && <div className="error-message" style={{ marginBottom: '16px' }}>{formErrors.submit}</div>}
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Address *</label>
+                                            <input
+                                                value={formData.address}
+                                                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                                placeholder="123 Main St"
+                                            />
+                                            {formErrors.address && <div className="error-message">{formErrors.address}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Client *</label>
+                                            <input
+                                                value={formData.client}
+                                                onChange={(e) => setFormData({...formData, client: e.target.value})}
+                                                placeholder="Client Name"
+                                            />
+                                            {formErrors.client && <div className="error-message">{formErrors.client}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Agent *</label>
+                                            <select
+                                                value={formData.agent}
+                                                onChange={(e) => setFormData({...formData, agent: e.target.value})}
+                                            >
+                                                <option value="">Select Agent</option>
+                                                <option value="Addison">Addison</option>
+                                                <option value="Will">Will</option>
+                                                <option value="Ron">Ron</option>
+                                                <option value="Zach">Zach</option>
+                                                <option value="Zayra">Zayra</option>
+                                            </select>
+                                            {formErrors.agent && <div className="error-message">{formErrors.agent}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Year</label>
+                                            <select
+                                                value={formData.year}
+                                                onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
+                                            >
+                                                <option value="2025">2025</option>
+                                                <option value="2026">2026</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Side</label>
+                                            <select
+                                                value={formData.side}
+                                                onChange={(e) => setFormData({...formData, side: e.target.value})}
+                                            >
+                                                <option value="buy">Buy</option>
+                                                <option value="sell">Sell</option>
+                                                <option value="both">Both</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Stage</label>
+                                            <select
+                                                value={formData.stage}
+                                                onChange={(e) => setFormData({...formData, stage: e.target.value})}
+                                            >
+                                                <option value="open">Open</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="closed">Closed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Sale Price</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.sale_price}
+                                                onChange={(e) => setFormData({...formData, sale_price: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.sale_price && <div className="error-message">{formErrors.sale_price}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Gross Commission</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.gross_commission}
+                                                onChange={(e) => setFormData({...formData, gross_commission: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.gross_commission && <div className="error-message">{formErrors.gross_commission}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Team Gross</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.team_gross}
+                                                onChange={(e) => setFormData({...formData, team_gross: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.team_gross && <div className="error-message">{formErrors.team_gross}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Agent Commission</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.agent_commission}
+                                                onChange={(e) => setFormData({...formData, agent_commission: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.agent_commission && <div className="error-message">{formErrors.agent_commission}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>FMLS Fee</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.fmls_fee}
+                                                onChange={(e) => setFormData({...formData, fmls_fee: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.fmls_fee && <div className="error-message">{formErrors.fmls_fee}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>FMLS Fee</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.fmls_fee}
+                                                onChange={(e) => setFormData({...formData, fmls_fee: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.fmls_fee && <div className="error-message">{formErrors.fmls_fee}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>FMLS Fee</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.fmls_fee}
+                                                onChange={(e) => setFormData({...formData, fmls_fee: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.fmls_fee && <div className="error-message">{formErrors.fmls_fee}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Team Split (%)</label>
+                                             <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.team_split}
+                                                onChange={(e) => setFormData({...formData, team_split: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.team_split && <div className="error-message">{formErrors.team_split}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Net Commission</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={formData.net_commission}
+                                                onChange={(e) => setFormData({...formData, net_commission: e.target.value})}
+                                                placeholder="0.00"
+                                            />
+                                            {formErrors.net_commission && <div className="error-message">{formErrors.net_commission}</div>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Closing Attorney</label>
+                                            <input
+                                                value={formData.closing_attorney}
+                                                onChange={(e) => setFormData({...formData, closing_attorney: e.target.value})}
+                                                placeholder="Attorney Name"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Earnest Money Date</label>
+                                            <input
+                                                type="date"
+                                                value={formData.earnest_money}
+                                                onChange={(e) => setFormData({...formData, earnest_money: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Close Date</label>
+                                            <input
+                                                type="date"
+                                                value={formData.close_date}
+                                                onChange={(e) => setFormData({...formData, close_date: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>Source</label>
+                                            <input
+                                                value={formData.source}
+                                                onChange={(e) => setFormData({...formData, source: e.target.value})}
+                                                placeholder="Lead Source"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Lender</label>
+                                            <input
+                                                value={formData.lender}
+                                                onChange={(e) => setFormData({...formData, lender: e.target.value})}
+                                                placeholder="Lender Name"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-row">
+                                        <div className="form-group" style={{ display: 'flex', alignItems: 'center', paddingTop: '8px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.referral_paid}
+                                                onChange={(e) => setFormData({...formData, referral_paid: e.target.checked})}
+                                                style={{ marginRight: '8px', width: 'auto' }}
+                                            />
+                                            <label style={{ marginBottom: 0 }}>Referral Paid</label>
+                                        </div>
+                                        <div className="form-group" style={{ display: 'flex', alignItems: 'center', paddingTop: '8px' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.handout}
+                                                onChange={(e) => setFormData({...formData, handout: e.target.checked})}
+                                                style={{ marginRight: '8px', width: 'auto' }}
+                                            />
+                                            <label style={{ marginBottom: 0 }}>Handout</label>
+                                        </div>
+                                    </div>
+
+                                    <div className="modal-buttons">
+                                        <button type="button" className="btn-secondary" onClick={() => setShowAddModal(false)}>
+                                            Cancel
+                                        </button>
+                                        <button type="submit" className="btn-primary">
+                                            Add Deal
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     )}
-                </div>
-            )}
-
-            {view === 'ratios' && agentData.map(ad => (
-                <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
-                        <h4 style={{color: ad.agent.color, fontSize:'16px'}}>{ad.agent.name}</h4>
-                        <div style={{fontSize:'13px',color:'#94a3b8'}}>Goal: ${(ad.goal/1000000).toFixed(1)}M | Volume: ${(ad.volume/1000000).toFixed(2)}M</div>
-                    </div>
-                    <div className="ratio-grid">
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#6366f1'}}>{ad.totalCalls}</div><div className="ratio-label">Calls</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#3b82f6'}}>{ad.totalAppts}</div><div className="ratio-label">Buyer Appts</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#22c55e'}}>{ad.totalListings}</div><div className="ratio-label">Listing Appts</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#eab308'}}>{ad.totalContracts}</div><div className="ratio-label">Offers Written</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#a855f7'}}>{ad.activeContracts}</div><div className="ratio-label">Under Contract</div></div>
-                        <div className="ratio-item"><div className="ratio-value" style={{color:'#ec4899'}}>{ad.closedDeals}</div><div className="ratio-label">Closed</div></div>
-                    </div>
-                    <div style={{marginTop:'12px',padding:'12px',background:'#22253a',borderRadius:'8px'}}>
-                        <div style={{fontSize:'11px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'8px'}}>Conversion Ratios</div>
-                        <div style={{display:'flex',gap:'16px',flexWrap:'wrap',fontSize:'13px'}}>
-                            <span>Calls {String.fromCodePoint(0x2192)} Appts: <strong style={{color:'#3b82f6'}}>{ad.callToAppt}%</strong></span>
-                            <span>Appts {String.fromCodePoint(0x2192)} Offers: <strong style={{color:'#22c55e'}}>{ad.apptToOffer}%</strong></span>
-                            <span>Offers {String.fromCodePoint(0x2192)} Contract: <strong style={{color:'#eab308'}}>{ad.offerToContract}%</strong></span>
-                            <span>Contact {String.fromCodePoint(0x2192)} Close: <strong style={{color:'#ec4899'}}>{ad.contactToClose}%</strong></span>
-                        </div>
-                    </div>
-                    {ad.coachTip && <div className="coaching-tip"><strong>Coaching:</strong> {ad.coachTip}</div>}
-                </div>
-            ))}
-
-            {view === 'trending' && agentData.map(ad => (
-                <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
-                    <h4 style={{color: ad.agent.color, marginBottom:'12px'}}>{ad.agent.name} â Monthly Calls</h4>
-                    <div style={{display:'flex',alignItems:'end',gap:'6px',height:'80px'}}>
-                        {ad.monthlyData.map((m, i) => {
-                            const max = Math.max(...ad.monthlyData.map(x => x.calls), 1);
-                            const h = (m.calls / max) * 100;
-                            return (
-                                <div key={m.month} style={{flex:1,textAlign:'center'}}>
-                                    <div style={{fontSize:'10px',color:'#e2e8f0',marginBottom:'2px'}}>{m.calls > 0 ? m.calls : ''}</div>
-                                    <div style={{height: Math.max(h, 4) + 'px', background: i + 1 === currentMonth ? ad.agent.color : 'rgba(99,102,241,0.2)', borderRadius:'3px 3px 0 0'}}></div>
-                                    <div style={{fontSize:'9px',color:'#64748b',marginTop:'2px'}}>{m.month}</div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div style={{display:'flex',gap:'6px',height:'60px',alignItems:'end',marginTop:'16px'}}>
-                        {ad.monthlyData.map((m, i) => {
-                            const max = Math.max(...ad.monthlyData.map(x => x.appts), 1);
-                            const h = (m.appts / max) * 100;
-                            return (
-                                <div key={m.month + 'a'} style={{flex:1,textAlign:'center'}}>
-                                    <div style={{fontSize:'10px',color:'#e2e8f0',marginBottom:'2px'}}>{m.appts > 0 ? m.appts : ''}</div>
-                                    <div style={{height: Math.max(h, 4) + 'px', background: i + 1 === currentMonth ? '#22c55e' : 'rgba(34,197,94,0.2)', borderRadius:'3px 3px 0 0'}}></div>
-                                    <div style={{fontSize:'9px',color:'#64748b',marginTop:'2px'}}>{m.month}</div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div style={{fontSize:'11px',color:'#64748b',marginTop:'8px'}}>Top: Calls | Bottom: Appointments</div>
-                </div>
-            ))}
-
-            {view === 'leaderboard' && (
-                <div className="card">
-                    <table>
-                        <thead><tr><th>Rank</th><th>Agent</th><th>Closed</th><th>Volume</th><th>Calls</th><th>Appts</th><th>% to Goal</th></tr></thead>
-                        <tbody>
-                            {[...agentData].sort((a, b) => b.volume - a.volume).map((ad, i) => (
-                                <tr key={ad.agent.name}>
-                                    <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? String.fromCodePoint(0x1F947) : i === 1 ? String.fromCodePoint(0x1F948) : i === 2 ? String.fromCodePoint(0x1F949) : i + 1}</td>
-                                    <td style={{color: ad.agent.color, fontWeight:600}}>{ad.agent.name}</td>
-                                    <td>{ad.closedDeals}</td>
-                                    <td>${(ad.volume/1000000).toFixed(2)}M</td>
-                                    <td>{ad.totalCalls}</td>
-                                    <td>{ad.totalAppts}</td>
-                                    <td>{ad.goal > 0 ? ((ad.volume / ad.goal) * 100).toFixed(0) + '%' : 'â'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </>
-    );
-}
-
-// âââ Tasks Page âââ
-function TasksPage({ tasks, setTasks, currentUser }) {
-    const [showModal, setShowModal] = useState(false);
-    const [form, setForm] = useState({});
-    const [filter, setFilter] = useState('mine');
-    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
-
-    const filtered = filter === 'all' ? tasks : filter === 'mine' ? tasks.filter(t => t.assignee === currentUser.name || t.assignee === currentUser.fullName) : tasks.filter(t => t.status === filter);
-
-    const addTask = async () => {
-        const data = { title: form.title, assignee: form.assignee || currentUser.name, due_date: form.due_date || null, status: 'todo', priority: form.priority || 'medium', updated_at: new Date().toISOString() };
-        const { data: nt, error } = await sb.from('tasks').insert(data).select();
-        if (!error && nt) {
-            setTasks(prev => [...prev, nt[0]]);
-            if (form.notify && form.assignee) {
-                // SMS notification would be sent via scheduled task
-                alert(`Task assigned to ${form.assignee}. SMS notification will be sent.`);
-            }
+                </>
+            );
         }
-        setShowModal(false);
-        setForm({});
-    };
 
-    const updateStatus = async (task, newStatus) => {
-        const { error } = await sb.from('tasks').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', task.id);
-        if (!error) setTasks(prev => prev.map(t => t.id === task.id ? {...t, status: newStatus} : t));
-    };
+        // Trending Page
+        function TrendingPage() {
+            const [trendingData, setTrendingData] = useState(null);
+            const [loading, setLoading] = useState(true);
 
-    const priorityColor = (p) => ({ high: '#ef4444', medium: '#eab308', low: '#22c55e' }[p] || '#94a3b8');
-    const statusBadge = (s) => ({ todo: 'badge-gray', 'in-progress': 'badge-blue', done: 'badge-green' }[s] || 'badge-gray');
+            useEffect(() => {
+                loadTrendingData();
+            }, []);
 
-    const pendingCount = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
+            async function loadTrendingData() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('deals')
+                        .select('*');
 
-    return (
-        <>
-            <div style={{display:'flex',gap:'8px',marginBottom:'20px',flexWrap:'wrap',alignItems:'center'}}>
-                <div className={`tab-item ${filter === 'mine' ? 'active' : ''}`} onClick={() => setFilter('mine')}>My Tasks {pendingCount > 0 && <span className="notification-badge" style={{marginLeft:'6px'}}>{pendingCount}</span>}</div>
-                <div className={`tab-item ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All Tasks</div>
-                <div className={`tab-item ${filter === 'todo' ? 'active' : ''}`} onClick={() => setFilter('todo')}>To Do</div>
-                <div className={`tab-item ${filter === 'in-progress' ? 'active' : ''}`} onClick={() => setFilter('in-progress')}>In Progress</div>
-                <div className={`tab-item ${filter === 'done' ? 'active' : ''}`} onClick={() => setFilter('done')}>Done</div>
-                <div style={{flex:1}}></div>
-                {isAdmin && <button className="btn btn-primary" onClick={() => { setForm({ assignee: '', notify: true }); setShowModal(true); }}>+ Assign Task</button>}
-            </div>
+                    if (error) throw error;
 
-            {filtered.map(t => (
-                <div key={t.id} className="card" style={{display:'flex',gap:'16px',alignItems:'center',padding:'16px'}}>
-                    <div style={{width:'4px',height:'40px',borderRadius:'2px',background: priorityColor(t.priority)}}></div>
-                    <div style={{flex:1}}>
-                        <div style={{fontWeight:500,marginBottom:'4px'}}>{t.title}</div>
-                        <div style={{fontSize:'12px',color:'#64748b'}}>Assigned to: {t.assignee || 'Unassigned'} {t.due_date && `| Due: ${t.due_date}`}</div>
+                    // Process data by year
+                    const years = {
+                        2025: { volume: 0, deals: 0, gci: 0, agents: {} },
+                        2026: { volume: 0, deals: 0, gci: 0, agents: {} }
+                    };
+
+                    const agents = ['Addison', 'Will', 'Ron', 'Zach'];
+                    agents.forEach(agent => {
+                        years[2025].agents[agent] = { volume: 0, deals: 0, gci: 0 };
+                        years[2026].agents[agent] = { volume: 0, deals: 0, gci: 0 };
+                    });
+
+                    data.forEach(deal => {
+                        const year = deal.year || 2026;
+                        const volume = deal.sale_price || 0;
+                        const gci = deal.gross_commission || 0;
+
+                        years[year].volume += volume;
+                        years[year].deals += 1;
+                        years[year].gci += gci;
+
+                        if (agents.includes(deal.agent)) {
+                            years[year].agents[deal.agent].volume += volume;
+                            years[year].agents[deal.agent].deals += 1;
+                            years[year].agents[deal.agent].gci += gci;
+                        }
+                    });
+
+                    setTrendingData(years);
+                } catch (error) {
+                    console.error('Error loading trending data:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            if (loading) {
+                return (
+                    <>
+                        <div className="header"><h2>Year-over-Year Trending</h2></div>
+                        <div className="content">
+                            <div className="loading"><div className="spinner"></div>Loading trending data...</div>
+                        </div>
+                    </>
+                );
+            }
+
+            if (!trendingData) {
+                return (
+                    <>
+                        <div className="header"><h2>Year-over-Year Trending</h2></div>
+                        <div className="content">
+                            <div className="empty-state">
+                                <h3>No data available</h3>
+                            </div>
+                        </div>
+                    </>
+                );
+            }
+
+            const calcChange = (val2025, val2026) => {
+                if (val2025 === 0) return 0;
+                return ((val2026 - val2025) / val2025 * 100).toFixed(1);
+            };
+
+            const formatCurrency = (val) => `$${(val / 1000000).toFixed(2)}M`;
+            const formatGCI = (val) => `$${(val / 1000).toFixed(0)}K`;
+
+            return (
+                <>
+                    <div className="header">
+                        <h2>Year-over-Year Trending</h2>
                     </div>
-                    <span className={`badge ${statusBadge(t.status)}`}>{t.status}</span>
-                    <div style={{display:'flex',gap:'6px'}}>
-                        {t.status !== 'in-progress' && <button className="btn btn-sm btn-outline" onClick={() => updateStatus(t, 'in-progress')}>Start</button>}
-                        {t.status !== 'done' && <button className="btn btn-sm btn-outline" style={{borderColor:'rgba(34,197,94,0.3)',color:'#22c55e'}} onClick={() => updateStatus(t, 'done')}>Done</button>}
+                    <div className="content">
+                        <div className="trending-container">
+                            {/* Team Totals */}
+                            <div className="trending-section">
+                                <h3>Team Totals</h3>
+                                <div className="trending-grid">
+                                    <div className="trending-card">
+                                        <h4>Total Volume</h4>
+                                        <div className="trending-comparison">
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2025</div>
+                                                <div className="trending-year-value">{formatCurrency(trendingData[2025].volume)}</div>
+                                            </div>
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2026</div>
+                                                <div className="trending-year-value">{formatCurrency(trendingData[2026].volume)}</div>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div className="progress-fill" style={{
+                                                width: trendingData[2025].volume > 0
+                                                    ? `${Math.min(100, (trendingData[2026].volume / trendingData[2025].volume) * 100)}%`
+                                                    : '0%'
+                                            }}></div>
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
+                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].volume, trendingData[2026].volume)) >= 0 ? 'positive' : 'negative'}`}>
+                                                {calcChange(trendingData[2025].volume, trendingData[2026].volume)}%
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="trending-card">
+                                        <h4>Total Deals</h4>
+                                        <div className="trending-comparison">
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2025</div>
+                                                <div className="trending-year-value">{trendingData[2025].deals}</div>
+                                            </div>
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2026</div>
+                                                <div className="trending-year-value">{trendingData[2026].deals}</div>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div className="progress-fill" style={{
+                                                width: trendingData[2025].deals > 0
+                                                    ? `${Math.min(100, (trendingData[2026].deals / trendingData[2025].deals) * 100)}%`
+                                                    : '0%'
+                                            }}></div>
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
+                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].deals, trendingData[2026].deals)) >= 0 ? 'positive' : 'negative'}`}>
+                                                {calcChange(trendingData[2025].deals, trendingData[2026].deals)}%
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="trending-card">
+                                        <h4>Total GCI</h4>
+                                        <div className="trending-comparison">
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2025</div>
+                                                <div className="trending-year-value">{formatGCI(trendingData[2025].gci)}</div>
+                                            </div>
+                                            <div className="trending-year">
+                                                <div className="trending-year-label">2026</div>
+                                                <div className="trending-year-value">{formatGCI(trendingData[2026].gci)}</div>
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar">
+                                            <div className="progress-fill" style={{
+                                                width: trendingData[2025].gci > 0
+                                                    ? `${Math.min(100, (trendingData[2026].gci / trendingData[2025].gci) * 100)}%`
+                                                    : '0%'
+                                            }}></div>
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
+                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].gci, trendingData[2026].gci)) >= 0 ? 'positive' : 'negative'}`}>
+                                                {calcChange(trendingData[2025].gci, trendingData[2026].gci)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Agent Breakdown */}
+                            <div className="trending-section">
+                                <h3>Agent Breakdown</h3>
+                                <div className="agent-breakdown">
+                                    {['Addison', 'Will', 'Ron', 'Zach'].map(agent => {
+                                        const data2025 = trendingData[2025].agents[agent];
+                                        const data2026 = trendingData[2026].agents[agent];
+
+                                        return (
+                                            <div key={agent} className="agent-card">
+                                                <h4>{agent}</h4>
+
+                                                <div className="agent-metric">
+                                                    <span className="agent-metric-label">Volume</span>
+                                                    <div className="agent-metric-values">
+                                                        <div className="metric-year">
+                                                            <span className="metric-year-label">2025</span>
+                                                            <span className="metric-year-value">{formatCurrency(data2025.volume)}</span>
+                                                        </div>
+                                                        <div className="metric-year">
+                                                            <span className="metric-year-label">2026</span>
+                                                            <span className="metric-year-value">{formatCurrency(data2026.volume)}</span>
+                                                        </div>
+                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.volume, data2026.volume)) >= 0 ? 'positive' : 'negative'}`}>
+                                                            {calcChange(data2025.volume, data2026.volume)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="agent-metric">
+                                                    <span className="agent-metric-label">Deals</span>
+                                                    <div className="agent-metric-values">
+                                                        <div className="metric-year">
+                                                            <span className="metric-year-label">2025</span>
+                                                            <span className="metric-year-value">{data2025.deals}</span>
+                                                        </div>
+                                                        <div className="metric-year">
+                                                            <span className="metric-year-label">2026</span>
+                                                            <span className="metric-year-value">{data2026.deals}</span>
+                                                        </div>
+                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.deals, data2026.deals)) >= 0 ? 'positive' : 'negative'}`}>
+                                                            {calcChange(data2025.deals, data2026.deals)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="agent-metric">
+                                                    <span className="agent-metric-label">GCI</span>
+                                                    <div className="agent-metric-values">
+                                                        <div className="metric-year">
+                                                                                                      <span className="metric-year-label">2025</span>
+                                                            <span className="metric-year-value">{formatGCI(data2025.gci)}</span>
+                                                        </div>
+                                                        <div className="metric-year">
+                                                            <span className="metric-year-label">2026</span>
+                                                            <span className="metric-year-value">{formatGCI(data2026.gci)}</span>
+                                                        </div>
+                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.gci, data2026.gci)) >= 0 ? 'positive' : 'negative'}`}>
+                                                            {calcChange(data2025.gci, data2026.gci)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            ))}
-            {filtered.length === 0 && <div className="empty-state">No tasks to show</div>}
+                </>
+            );
+        }
 
-            {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="modal-title">Assign New Task</div>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>Ã</button>
-                        </div>
-                        <div className="form-group"><label className="form-label">Task Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Assign To</label>
-                                <select className="form-select" value={form.assignee||''} onChange={e => setForm({...form, assignee: e.target.value})}>
-                                    <option value="">Select...</option>
-                                    {AGENTS.map(a => <option key={a.name} value={a.name}>{a.name} ({a.role})</option>)}
-                                </select></div>
-                            <div className="form-group"><label className="form-label">Priority</label>
-                                <select className="form-select" value={form.priority||'medium'} onChange={e => setForm({...form, priority: e.target.value})}>
-                                    <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-                                </select></div>
-                        </div>
-                        <div className="form-group"><label className="form-label">Due Date</label><input className="form-input" type="date" value={form.due_date||''} onChange={e => setForm({...form, due_date: e.target.value})} /></div>
-                        <div className="form-group" style={{display:'flex',gap:'8px',alignItems:'center'}}>
-                            <input type="checkbox" checked={form.notify||false} onChange={e => setForm({...form, notify: e.target.checked})} style={{accentColor:'#6366f1'}} />
-                            <label style={{fontSize:'13px',color:'#94a3b8'}}>Send SMS notification to assignee</label>
-                        </div>
-                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
-                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={addTask}>Assign Task</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
-}
-
-// âââ Content Page âââ
-function ContentPage({ content, setContent, currentUser }) {
-    const [showModal, setShowModal] = useState(false);
-    const [form, setForm] = useState({});
-    const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Team Lead';
-
-    const addContent = async () => {
-        const data = { title: form.title, stage: form.stage || 'Idea', platform: form.platform || '', target_date: form.target_date || null, updated_at: new Date().toISOString() };
-        const { data: nc, error } = await sb.from('content').insert(data).select();
-        if (!error && nc) setContent(prev => [...prev, nc[0]]);
-        setShowModal(false);
-        setForm({});
-    };
-
-    const platforms = ['Instagram', 'Facebook', 'TikTok', 'YouTube', 'Blog', 'Email'];
-    const stages = ['Idea', 'In Progress', 'Review', 'Scheduled', 'Published'];
-
-    return (
-        <>
-            <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'16px'}}>
-                {isAdmin && <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ New Content</button>}
-            </div>
-            <div className="table-container">
-                <table>
-                    <thead><tr><th>Title</th><th>Platform</th><th>Stage</th><th>Target Date</th></tr></thead>
-                    <tbody>
-                        {content.map(c => (
-                            <tr key={c.id}>
-                                <td style={{fontWeight:500}}>{c.title}</td>
-                                <td>{c.platform}</td>
-                                <td><span className={`badge ${c.stage === 'Published' ? 'badge-green' : c.stage === 'Scheduled' ? 'badge-blue' : 'badge-gray'}`}>{c.stage}</span></td>
-                                <td>{c.target_date || 'â'}</td>
-                            </tr>
-                        ))}
-                        {content.length === 0 && <tr><td colSpan={4} className="empty-state">No content items yet</td></tr>}
-                    </tbody>
-                </table>
-            </div>
-
-            {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" style={{width:'450px'}} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header"><div className="modal-title">New Content</div><button className="modal-close" onClick={() => setShowModal(false)}>Ã</button></div>
-                        <div className="form-group"><label className="form-label">Title</label><input className="form-input" value={form.title||''} onChange={e => setForm({...form, title: e.target.value})} /></div>
-                        <div className="form-row">
-                            <div className="form-group"><label className="form-label">Platform</label>
-                                <select className="form-select" value={form.platform||''} onChange={e => setForm({...form, platform: e.target.value})}>
-                                    <option value="">Select...</option>{platforms.map(p => <option key={p} value={p}>{p}</option>)}
-                                </select></div>
-                            <div className="form-group"><label className="form-label">Stage</label>
-                                <select className="form-select" value={form.stage||'Idea'} onChange={e => setForm({...form, stage: e.target.value})}>
-                                    {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select></div>
-                        </div>
-                        <div className="form-group"><label className="form-label">Target Date</label><input className="form-input" type="date" value={form.target_date||''} onChange={e => setForm({...form, target_date: e.target.value})} /></div>
-                        <div style={{display:'flex',gap:'12px',justifyContent:'flex-end',marginTop:'16px'}}>
-                            <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={addContent}>Create</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
-}
-
-// âââ Main App âââ
-function App() {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [page, setPage] = useState('overview');
-    const [deals, setDeals] = useState([]);
-    const [goals, setGoals] = useState([]);
-    const [kpis, setKpis] = useState([]);
-    const [tasks, setTasks] = useState([]);
-    const [content, setContent] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (!currentUser) return;
-        (async () => {
-            setLoading(true);
-            const [d, g, k, t, c] = await Promise.all([
-                sb.from('deals').select('*').order('created_at', { ascending: false }),
-                sb.from('agent_goals').select('*'),
-                sb.from('kpis').select('*'),
-                sb.from('tasks').select('*').order('created_at', { ascending: false }),
-                sb.from('content').select('*').order('created_at', { ascending: false }),
-            ]);
-            if (d.data) setDeals(d.data);
-            if (g.data) setGoals(g.data);
-            if (k.data) setKpis(k.data);
-            if (t.data) setTasks(t.data);
-            if (c.data) setContent(c.data);
-            setLoading(false);
-        })();
-    }, [currentUser]);
-
-    if (!currentUser) return <LoginScreen onLogin={setCurrentUser} />;
-
-    const pages = [
-        { id: 'overview', label: 'Overview', icon: String.fromCodePoint(0x1F4CA) },
-        { id: 'deals', label: 'Deals', icon: String.fromCodePoint(0x1F3E0) },
-        { id: 'scoreboard', label: 'Scoreboard', icon: String.fromCodePoint(0x1F3C6) },
-        { id: 'tasks', label: 'Tasks', icon: String.fromCodePoint(0x2705) },
-        { id: 'content', label: 'Content', icon: String.fromCodePoint(0x1F4F1) },
-    ];
-
-    const pendingTasks = tasks.filter(t => t.status !== 'done' && (t.assignee === currentUser.name || t.assignee === currentUser.fullName)).length;
-
-    const pageTitle = { overview: 'Team Overview', deals: 'Deal Pipeline', scoreboard: 'Scoreboard & Coaching', tasks: 'Tasks', content: 'Content Planner' };
-
-    return (
-        <div className="app-container">
-            <div className="sidebar">
-                <div className="sidebar-header">
-                    <div className="sidebar-logo">TCT</div>
-                    <div className="sidebar-subtitle">Team Command Center</div>
-                </div>
-                <div className="nav-items">
-                    {pages.map(p => (
-                        <div key={p.id} className={`nav-item ${page === p.id ? 'active' : ''}`} onClick={() => setPage(p.id)}>
-                            <span className="nav-icon">{p.icon}</span>
-                            <span className="nav-label">{p.label}</span>
-                            {p.id === 'tasks' && pendingTasks > 0 && <span className="notification-badge">{pendingTasks}</span>}
-                        </div>
-                    ))}
-                </div>
-                <div className="user-card">
-                    <div className="user-avatar" style={{background: currentUser.color}}>{currentUser.name[0]}</div>
-                    <div className="user-info">
-                        <div className="user-name">{currentUser.name}</div>
-                        <div className="user-role">{currentUser.role}</div>
-                    </div>
-                </div>
-                <button className="logout-btn" onClick={() => { setCurrentUser(null); setPage('overview'); }}>Sign Out</button>
-            </div>
-            <div className="main-content">
-                <div className="page-header">
-                    <div className="page-title">{pageTitle[page]}</div>
-                    {loading && <div style={{fontSize:'12px',color:'#64748b'}}>Loading...</div>}
-                </div>
-                <div className="page-content">
-                    {page === 'overview' && <OverviewPage deals={deals} goals={goals} kpis={kpis} currentUser={currentUser} />}
-                    {page === 'deals' && <DealsPage deals={deals} setDeals={setDeals} currentUser={currentUser} />}
-                    {page === 'scoreboard' && <ScoreboardPage deals={deals} kpis={kpis} goals={goals} setKpis={setKpis} currentUser={currentUser} />}
-                    {page === 'tasks' && <TasksPage tasks={tasks} setTasks={setTasks} currentUser={currentUser} />}
-                    {page === 'content' && <ContentPage content={content} setContent={setContent} currentUser={currentUser} />}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
