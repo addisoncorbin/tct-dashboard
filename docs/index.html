@@ -744,7 +744,7 @@
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                                    placeholder="Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢"
                                 />
                             </div>
                             {error && <div className="error-message">{error}</div>}
@@ -1374,51 +1374,40 @@
         }
 
         // Trending Page
-        function TrendingPage() {
+                function TrendingPage() {
             const [trendingData, setTrendingData] = useState(null);
             const [loading, setLoading] = useState(true);
+            const [selectedAgent, setSelectedAgent] = useState('Team');
 
-            useEffect(() => {
-                loadTrendingData();
-            }, []);
+            useEffect(() => { loadTrendingData(); }, []);
 
             async function loadTrendingData() {
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('deals')
-                        .select('*');
-
+                    const { data, error } = await supabaseClient.from('deals').select('*');
                     if (error) throw error;
 
-                    // Process data by year
-                    const years = {
-                        2025: { volume: 0, deals: 0, gci: 0, agents: {} },
-                        2026: { volume: 0, deals: 0, gci: 0, agents: {} }
-                    };
-
-                    const agents = ['Addison', 'Will', 'Ron', 'Zach'];
-                    agents.forEach(agent => {
-                        years[2025].agents[agent] = { volume: 0, deals: 0, gci: 0 };
-                        years[2026].agents[agent] = { volume: 0, deals: 0, gci: 0 };
-                    });
+                    const years = {};
+                    const allAgents = new Set();
 
                     data.forEach(deal => {
                         const year = deal.year || 2026;
                         const volume = deal.sale_price || 0;
                         const gci = deal.gross_commission || 0;
+                        const agent = deal.agent || 'Unknown';
+                        allAgents.add(agent);
 
+                        if (!years[year]) years[year] = { volume: 0, deals: 0, gci: 0, agents: {} };
                         years[year].volume += volume;
                         years[year].deals += 1;
                         years[year].gci += gci;
 
-                        if (agents.includes(deal.agent)) {
-                            years[year].agents[deal.agent].volume += volume;
-                            years[year].agents[deal.agent].deals += 1;
-                            years[year].agents[deal.agent].gci += gci;
-                        }
+                        if (!years[year].agents[agent]) years[year].agents[agent] = { volume: 0, deals: 0, gci: 0 };
+                        years[year].agents[agent].volume += volume;
+                        years[year].agents[agent].deals += 1;
+                        years[year].agents[agent].gci += gci;
                     });
 
-                    setTrendingData(years);
+                    setTrendingData({ years, agents: Array.from(allAgents).sort() });
                 } catch (error) {
                     console.error('Error loading trending data:', error);
                 } finally {
@@ -1426,197 +1415,128 @@
                 }
             }
 
-            if (loading) {
-                return (
-                    <>
-                        <div className="header"><h2>Year-over-Year Trending</h2></div>
-                        <div className="content">
-                            <div className="loading"><div className="spinner"></div>Loading trending data...</div>
-                        </div>
-                    </>
-                );
-            }
+            if (loading) return (<><div className="header"><h2>Year-over-Year Trending</h2></div><div className="content"><div className="loading"><div className="spinner"></div>Loading...</div></div></>);
+            if (!trendingData) return (<><div className="header"><h2>Year-over-Year Trending</h2></div><div className="content"><div className="empty-state"><h3>No data available</h3></div></div></>);
 
-            if (!trendingData) {
-                return (
-                    <>
-                        <div className="header"><h2>Year-over-Year Trending</h2></div>
-                        <div className="content">
-                            <div className="empty-state">
-                                <h3>No data available</h3>
-                            </div>
-                        </div>
-                    </>
-                );
-            }
+            const { years, agents } = trendingData;
+            const sortedYears = Object.keys(years).map(Number).sort();
+            const coreAgents = ['Addison', 'Will', 'Ron', 'Zach'];
+            const formatM = v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : `$${(v/1000).toFixed(0)}K`;
+            const formatK = v => `$${(v/1000).toFixed(0)}K`;
+            const pctChange = (prev, curr) => prev === 0 ? '--' : `${((curr - prev) / prev * 100).toFixed(0)}%`;
+            const barColors = ['#58a6ff','#3fb950','#f0883e','#bc8cff','#f778ba','#79c0ff','#d2a8ff','#ffa657'];
 
-            const calcChange = (val2025, val2026) => {
-                if (val2025 === 0) return 0;
-                return ((val2026 - val2025) / val2025 * 100).toFixed(1);
+            const getDataForView = (year) => {
+                const yd = years[year] || { volume: 0, deals: 0, gci: 0, agents: {} };
+                if (selectedAgent === 'Team') return { volume: yd.volume, deals: yd.deals, gci: yd.gci };
+                const ad = (yd.agents && yd.agents[selectedAgent]) || { volume: 0, deals: 0, gci: 0 };
+                return ad;
             };
 
-            const formatCurrency = (val) => `$${(val / 1000000).toFixed(2)}M`;
-            const formatGCI = (val) => `$${(val / 1000).toFixed(0)}K`;
+            const maxVol = Math.max(...sortedYears.map(y => getDataForView(y).volume), 1);
+            const maxGCI = Math.max(...sortedYears.map(y => getDataForView(y).gci), 1);
+            const maxDeals = Math.max(...sortedYears.map(y => getDataForView(y).deals), 1);
 
             return (
                 <>
-                    <div className="header">
-                        <h2>Year-over-Year Trending</h2>
-                    </div>
+                    <div className="header"><h2>Year-over-Year Trending</h2></div>
                     <div className="content">
-                        <div className="trending-container">
-                            {/* Team Totals */}
-                            <div className="trending-section">
-                                <h3>Team Totals</h3>
-                                <div className="trending-grid">
-                                    <div className="trending-card">
-                                        <h4>Total Volume</h4>
-                                        <div className="trending-comparison">
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2025</div>
-                                                <div className="trending-year-value">{formatCurrency(trendingData[2025].volume)}</div>
-                                            </div>
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2026</div>
-                                                <div className="trending-year-value">{formatCurrency(trendingData[2026].volume)}</div>
-                                            </div>
-                                        </div>
-                                        <div className="progress-bar">
-                                            <div className="progress-fill" style={{
-                                                width: trendingData[2025].volume > 0
-                                                    ? `${Math.min(100, (trendingData[2026].volume / trendingData[2025].volume) * 100)}%`
-                                                    : '0%'
-                                            }}></div>
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
-                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].volume, trendingData[2026].volume)) >= 0 ? 'positive' : 'negative'}`}>
-                                                {calcChange(trendingData[2025].volume, trendingData[2026].volume)}%
-                                            </span>
-                                        </div>
-                                    </div>
+                        <div style={{marginBottom:'16px',display:'flex',gap:'8px',flexWrap:'wrap'}}>
+                            {['Team', ...coreAgents].map(a => (
+                                <button key={a} onClick={() => setSelectedAgent(a)}
+                                    style={{padding:'6px 16px',borderRadius:'6px',border:'1px solid '+(selectedAgent===a?'#58a6ff':'#30363d'),
+                                    background:selectedAgent===a?'#58a6ff':'#21262d',color:selectedAgent===a?'#fff':'#c9d1d9',
+                                    cursor:'pointer',fontSize:'13px',fontWeight:selectedAgent===a?'600':'400'}}>
+                                    {a}
+                                </button>
+                            ))}
+                        </div>
 
-                                    <div className="trending-card">
-                                        <h4>Total Deals</h4>
-                                        <div className="trending-comparison">
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2025</div>
-                                                <div className="trending-year-value">{trendingData[2025].deals}</div>
-                                            </div>
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2026</div>
-                                                <div className="trending-year-value">{trendingData[2026].deals}</div>
-                                            </div>
-                                        </div>
-                                        <div className="progress-bar">
-                                            <div className="progress-fill" style={{
-                                                width: trendingData[2025].deals > 0
-                                                    ? `${Math.min(100, (trendingData[2026].deals / trendingData[2025].deals) * 100)}%`
-                                                    : '0%'
-                                            }}></div>
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
-                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].deals, trendingData[2026].deals)) >= 0 ? 'positive' : 'negative'}`}>
-                                                {calcChange(trendingData[2025].deals, trendingData[2026].deals)}%
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="trending-card">
-                                        <h4>Total GCI</h4>
-                                        <div className="trending-comparison">
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2025</div>
-                                                <div className="trending-year-value">{formatGCI(trendingData[2025].gci)}</div>
-                                            </div>
-                                            <div className="trending-year">
-                                                <div className="trending-year-label">2026</div>
-                                                <div className="trending-year-value">{formatGCI(trendingData[2026].gci)}</div>
-                                            </div>
-                                        </div>
-                                        <div className="progress-bar">
-                                            <div className="progress-fill" style={{
-                                                width: trendingData[2025].gci > 0
-                                                    ? `${Math.min(100, (trendingData[2026].gci / trendingData[2025].gci) * 100)}%`
-                                                    : '0%'
-                                            }}></div>
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: '#8b949e', marginTop: '8px' }}>
-                                            Change: <span className={`metric-change ${parseFloat(calcChange(trendingData[2025].gci, trendingData[2026].gci)) >= 0 ? 'positive' : 'negative'}`}>
-                                                {calcChange(trendingData[2025].gci, trendingData[2026].gci)}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Agent Breakdown */}
-                            <div className="trending-section">
-                                <h3>Agent Breakdown</h3>
-                                <div className="agent-breakdown">
-                                    {['Addison', 'Will', 'Ron', 'Zach'].map(agent => {
-                                        const data2025 = trendingData[2025].agents[agent];
-                                        const data2026 = trendingData[2026].agents[agent];
-
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'16px',marginBottom:'24px'}}>
+                            {/* Volume Bar Chart */}
+                            <div className="trending-card" style={{padding:'16px'}}>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Volume by Year</h4>
+                                <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+                                    {sortedYears.map((y,i) => {
+                                        const d = getDataForView(y);
                                         return (
-                                            <div key={agent} className="agent-card">
-                                                <h4>{agent}</h4>
-
-                                                <div className="agent-metric">
-                                                    <span className="agent-metric-label">Volume</span>
-                                                    <div className="agent-metric-values">
-                                                        <div className="metric-year">
-                                                            <span className="metric-year-label">2025</span>
-                                                            <span className="metric-year-value">{formatCurrency(data2025.volume)}</span>
-                                                        </div>
-                                                        <div className="metric-year">
-                                                            <span className="metric-year-label">2026</span>
-                                                            <span className="metric-year-value">{formatCurrency(data2026.volume)}</span>
-                                                        </div>
-                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.volume, data2026.volume)) >= 0 ? 'positive' : 'negative'}`}>
-                                                            {calcChange(data2025.volume, data2026.volume)}%
-                                                        </span>
-                                                    </div>
+                                            <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                                <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
+                                                <div style={{flex:1,background:'#161b22',borderRadius:'4px',height:'20px',position:'relative'}}>
+                                                    <div style={{width:`${(d.volume/maxVol)*100}%`,height:'100%',background:barColors[i%barColors.length],borderRadius:'4px',transition:'width 0.5s'}}></div>
                                                 </div>
-
-                                                <div className="agent-metric">
-                                                    <span className="agent-metric-label">Deals</span>
-                                                    <div className="agent-metric-values">
-                                                        <div className="metric-year">
-                                                            <span className="metric-year-label">2025</span>
-                                                            <span className="metric-year-value">{data2025.deals}</span>
-                                                        </div>
-                                                        <div className="metric-year">
-                                                            <span className="metric-year-label">2026</span>
-                                                            <span className="metric-year-value">{data2026.deals}</span>
-                                                        </div>
-                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.deals, data2026.deals)) >= 0 ? 'positive' : 'negative'}`}>
-                                                            {calcChange(data2025.deals, data2026.deals)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="agent-metric">
-                                                    <span className="agent-metric-label">GCI</span>
-                                                    <div className="agent-metric-values">
-                                                        <div className="metric-year">
-                                                                                                      <span className="metric-year-label">2025</span>
-                                                            <span className="metric-year-value">{formatGCI(data2025.gci)}</span>
-                                                        </div>
-                                                        <div className="metric-year">
-                                                            <span className="metric-year-label">2026</span>
-                                                            <span className="metric-year-value">{formatGCI(data2026.gci)}</span>
-                                                        </div>
-                                                        <span className={`metric-change ${parseFloat(calcChange(data2025.gci, data2026.gci)) >= 0 ? 'positive' : 'negative'}`}>
-                                                            {calcChange(data2025.gci, data2026.gci)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                                <span style={{width:'60px',fontSize:'11px',color:'#c9d1d9',textAlign:'right'}}>{formatM(d.volume)}</span>
                                             </div>
                                         );
                                     })}
                                 </div>
                             </div>
+                            {/* Deals Bar Chart */}
+                            <div classNameelectedAgent===a?'#58a6ff':'#30363d'),
+                                    background:selectedAgent===a?'#58a6ff':'#21262d',color:selectedAgent===a?'#fff':'#c9d1d9',
+                                    cursor:'pointer',fontSize:'13px',fontWeight:selectedAgent===a?'600':'400'}}>
+                                    {a}
+                                </button>
+                            ))}
                         </div>
+
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'16px',marginBottom:'24px'}}>
+                            {/* Volume Bar Chart */}
+                            <div className="trending-card" style={{padding:'16px'}}>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Volume by Year</h4>
+                                <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+                                    {sortedYears.map((y,i) => {
+                                        const d = getDataForView(y);
+                                        return (
+                                            <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                                <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
+                                                <div style={{flex:1,background:'#161b22',borderRadius:'4px',height:'20px',position:'relative'}}>
+                                                    <div style={{width:`${(d.volume/maxVol)*100}%`,height:'100%',background:barColors[i%barColors.length],borderRadius:'4px',transition:'width 0.5s'}}></div>
+                                                </div>
+                                                <span style={{width:'60px',fontSize:'11px',color:'#c9d1d9',textAlign:'right'}}>{formatM(d.volume)}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            {/* Deals Bar Chart */}
+                            <div className="trending-card" style={{padding:'16px'}}>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Deals by Year</h4>
+                                <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+                                    {sortedYears.map((y,i) => {
+                                        const d = getDataForView(y);
+                                        return (
+                                            <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                                <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
+                                                <div style={{flex:1,background:'#161b22',borderRadius:'4px',height:'20px',position:'relative'}}>
+                                                    <div style={{width:`${(d.deals/maxDeals)*100}%`,height:'100%',background:barColors[(i+2)%barColors.length],borderRadius:'4px',transition:'width 0.5s'}}></div>
+                                                </div>
+                                                <span style={{width:'36px',fontSize:'11px',color:'#c9d1d9',textAlign:'right'}}>{d.deals}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            {/* GCI Bar Chart */}
+                            <div className="trending-card" style={{padding:'16px'}}>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>GCI by Year</h4>
+                                <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+                                    {sortedYears.map((y,i) => {
+                                        const d = getDataForView(y);
+                                        return (
+                                            <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                                <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
+                         ]Ý[O^ÞÙ^KXÚÙÜÝ[ÈÌMXËÜ\Y]\ÎÍ	ËZYÚÌ	ËÜÚ][ÛÜ[]]Iß_O]Ý[O^ÞÝÚY	ÊØÚKÛX^ÐÒJJLIXZYÚÌL	IËXÚÙÜÝ[\ÛÛÜÖÊJÍ
+IX\ÛÛÜË[ÝKÜ\Y]\ÎÍ	Ë[Ú][ÛÝÚY\Éß_OÙ]Ù]Ü[Ý[O^ÞÝÚYÍL	ËÛÚ^NÌL\	ËÛÛÜÈØÎYYIË^[YÛÜYÚ	ß_OÙÜX]ÊØÚJ_OÜÜ[Ù]
+NÂJ_BÙ]Ù]Ù]ËÊ]Z[YYX\XH
+ßB]Û\ÜÓ[YOH[[ËXØ\Ý[O^ÞÜY[ÎÌM	ËÝ\ÝÖØ]]Éß_OÝ[O^ÞÛX\Ú[ÌL	ËÛÛÜÈØÎYYIËÛÚ^NÌM	ß_OÜÙ[XÝYYÙ[OOH	ÕX[IÈÈ	ÕX[IÈÙ[XÝYYÙ[H8 %YX\]Z[ÚXHÝ[O^ÞÝÚYÌL	IËÜ\ÛÛ\ÙNØÛÛ\ÙIËÛÚ^NÌLÜ	ß_O¢ÇFVCà¢ÇG"7GÆS×·¶&÷&FW$&÷GFöÓ¢s6öÆB333c6Bw×Óà¢ÇF7GÆS×··FWDÆvã¢vÆVgBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåV#Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåföÇVÖSÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓäFVÇ3Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×Óät4Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×Óäfr&6SÂ÷Fà¢Â÷G#à¢Â÷FVCà¢ÇF&öGà¢·6÷'FVEV'2æÖÂGÓâ°¢6öç7BBÒvWDFFf÷%fWr°¢6öç7B&WbÒGâòvWDFFf÷%fWr6÷'FVEV'5¶GÓÒ¢çVÆÃ°¢6öç7BföÄ6rÒ&Wbò7D6ævR&WbçföÇVÖRÂBçföÇVÖR¢rÒÒs°¢ ½¹ÍÐ±¡ôÁÉØüÁÑ¡¹¡ÁÉØ¹±Ì°¹±Ì¤è´´ì(½¹ÍÐ¥¡ôÁÉØüÁÑ¡¹¡ÁÉØ¹¤°¹¤¤è´´ì(½¹ÍÐÙAÉ¥ô¹±ÌøÀü½ÉµÑ4¡¹Ù½±Õµ¼¹±Ì¤è´´ì(½¹ÍÐ¡½±½Èô¡Ø¤ôøØôôô´´üáäÐåè¡Ø¹ÍÑÉÑÍ]¥Ñ  ´¤üàÔÄÐäèÍäÔÀ¤ì(ÉÑÕÉ¸ (ñÑÈ­äõíåôÍÑå±õíí½ÉÉ	½ÑÑ½´èÅÁàÍ½±¥ÈÄÈØÉõôø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±½¹Ñ]¥¡ÐèØÀÀõôùíåôð½Ñø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±ÑáÑ±¥¸èÉ¥¡Ðõôùí½ÉµÑ4¡¸åõôùY½±Õµð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôù±Ìð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôù$ð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôùÙAÉ¥ð½Ñ ø(ð½ÑÈø(ð½Ñ¡ø(ñÑ½äø(í½É¹ÑÌ¹µÀ¡¹Ðôøì(½¹ÍÐ±ÑÍÑeÈôÍ½ÉÑeÉÍmÍ½ÉÑeÉÌ¹±¹Ñ ´Åtì(½¹ÍÐô¡åÉÍm±ÑÍÑeÉtåÉÍm±ÑÍÑeÉt¹¹ÑÍm¹Ñt¤ñðíÙ½±ÕµèÀ±±ÌèÀ±¤èÁôì(ÉÑÕÉ¸ (ñÑÈ­äõí¹ÑôÍÑå±õíí½ÉÉ	½ÑÑ½´èÅÁàÍ½±¥ÈÄÈØÉ±ÕÉÍ½ÈèÁ½¥¹ÑÈõô½¹±¥¬õì ¤ôøÍÑM±Ñ¹Ð¡¹Ð¥ôø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèÔáÙ±½¹Ñ]¥¡ÐèØÀÀõôùí¹Ñôð½Ñø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±ÑáÑ±¥¸èÉ¥¡Ðõôùí½ÉµÑ4¡¹Ù½±Õµ¥ôð½Ñø(8b949e',textAlign:'right'}}>{ad.deals > 0 ? formatM(ad.volume/ad.deals) : '--'}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 </>
             );
