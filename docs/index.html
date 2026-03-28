@@ -242,7 +242,7 @@ function OverviewPage({ deals, goals, kpis, currentUser }) {
                 </div>
                 <div className="stat-card">
                     <div className="stat-label">Team GCI</div>
-                    <div className="stat-value">${(totalGCI/1000).toFixed(0)}K</div>
+                    <div className="stat-value">${(totalGCI/1000000).toFixed(2)}M</div>
                     <div className="stat-subtext">{closedDeals.length} deals closed</div>
                 </div>
                 <div className="stat-card">
@@ -283,7 +283,7 @@ function OverviewPage({ deals, goals, kpis, currentUser }) {
                         <div className="progress-bar" style={{marginBottom:'12px'}}><div className="progress-fill" style={{width: Math.min(pct, 100) + '%', background: agent.color}}></div></div>
                         <div className="agent-stats">
                             <div className="agent-stat"><div className="agent-stat-value">{agentDeals.length}</div><div className="agent-stat-label">Units</div></div>
-                            <div className="agent-stat"><div className="agent-stat-value">${(agentVol/1000).toFixed(0)}K</div><div className="agent-stat-label">Volume</div></div>
+                            <div className="agent-stat"><div className="agent-stat-value">${(agentVol/1000000).toFixed(2)}M</div><div className="agent-stat-label">Volume</div></div>
                             <div className="agent-stat"><div className="agent-stat-value">{totalCalls}</div><div className="agent-stat-label">Calls</div></div>
                             <div className="agent-stat"><div className="agent-stat-value">${(gap/1000000).toFixed(1)}M</div><div className="agent-stat-label">Gap</div></div>
                         </div>
@@ -567,7 +567,7 @@ function ScoreboardPage({ deals, kpis, goals, setKpis, currentUser }) {
                 <div key={ad.agent.name} className="card" style={{marginBottom:'16px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
                         <h4 style={{color: ad.agent.color, fontSize:'16px'}}>{ad.agent.name}</h4>
-                        <div style={{fontSize:'13px',color:'#94a3b8'}}>Goal: ${(ad.goal/1000000).toFixed(1)}M | Volume: ${(ad.volume/1000).toFixed(0)}K</div>
+                        <div style={{fontSize:'13px',color:'#94a3b8'}}>Goal: ${(ad.goal/1000000).toFixed(1)}M | Volume: ${(ad.volume/1000000).toFixed(2)}M</div>
                     </div>
                     <div className="ratio-grid">
                         <div className="ratio-item"><div className="ratio-value" style={{color:'#6366f1'}}>{ad.totalCalls}</div><div className="ratio-label">Calls</div></div>
@@ -633,7 +633,7 @@ function ScoreboardPage({ deals, kpis, goals, setKpis, currentUser }) {
                                     <td style={{fontWeight:'bold',color: i === 0 ? '#eab308' : '#e2e8f0'}}>{i === 0 ? String.fromCodePoint(0x1F947) : i === 1 ? String.fromCodePoint(0x1F948) : i === 2 ? String.fromCodePoint(0x1F949) : i + 1}</td>
                                     <td style={{color: ad.agent.color, fontWeight:600}}>{ad.agent.name}</td>
                                     <td>{ad.closedDeals}</td>
-                                    <td>${(ad.volume/1000).toFixed(0)}K</td>
+                                    <td>${(ad.volume/1000000).toFixed(2)}M</td>
                                     <td>{ad.totalCalls}</td>
                                     <td>{ad.totalAppts}</td>
                                     <td>{ad.goal > 0 ? ((ad.volume / ad.goal) * 100).toFixed(0) + '%' : 'â'}</td>
