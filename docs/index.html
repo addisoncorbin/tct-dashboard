@@ -612,6 +612,50 @@
         .security-info strong {
             color: #e6edf3;
         }
+        /* Coaching & Pipeline styles */
+        .kanban-board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
+        .kanban-col { flex: 1; min-width: 280px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; }
+        .kanban-col-header { padding: 12px 16px; border-bottom: 1px solid #30363d; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .kanban-col-body { padding: 8px; min-height: 200px; }
+        .kanban-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.2s; }
+        .kanban-card:hover { border-color: #58a6ff; }
+        .kanban-card h4 { font-size: 13px; margin-bottom: 6px; color: #e6edf3; }
+        .kanban-card p { font-size: 12px; color: #8b949e; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .badge-high { background: #f8514922; color: #f85149; }
+        .badge-medium { background: #d2992222; color: #d29922; }
+        .badge-low { background: #23863622; color: #3fb950; }
+        .badge-todo { background: #30363d; color: #8b949e; }
+        .badge-in-progress { background: #1f6feb22; color: #58a6ff; }
+        .badge-done { background: #23863622; color: #3fb950; }
+        .scorecard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        .scorecard { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
+        .scorecard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .scorecard-header h3 { font-size: 18px; color: #58a6ff; }
+        .scorecard-rank { font-size: 24px; font-weight: 700; color: #8b949e; }
+        .scorecard-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .scorecard-stat label { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+        .scorecard-stat .val { font-size: 18px; font-weight: 600; color: #e6edf3; }
+        .activity-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .activity-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }
+        .activity-card .val { font-size: 28px; font-weight: 700; color: #58a6ff; }
+        .activity-card label { font-size: 12px; color: #8b949e; }
+        .pipeline-stage { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stage-card { flex: 1; min-width: 160px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }
+        .stage-card .count { font-size: 32px; font-weight: 700; }
+        .stage-card .label { font-size: 12px; color: #8b949e; margin-top: 4px; }
+        .stage-active { color: #58a6ff; }
+        .stage-pending { color: #d29922; }
+        .stage-closed { color: #3fb950; }
+        .stage-lost { color: #f85149; }
+        .fub-prompt { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 24px; text-align: center; }
+        .fub-prompt input { margin: 12px 0; width: 100%; max-width: 400px; }
+        .tab-bar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #30363d; padding-bottom: 0; }
+        .tab-btn { padding: 8px 16px; cursor: pointer; border: none; background: none; color: #8b949e; font-size: 13px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-btn:hover { color: #e6edf3; }
+        .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+        .note-card { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 8px; }
+        .note-card .meta { font-size: 11px; color: #6e7681; margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -744,7 +788,7 @@
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢"
+                                    placeholder="ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢ÃÂ¢ÃÂÃÂ¢"
                                 />
                             </div>
                             {error && <div className="error-message">{error}</div>}
@@ -786,6 +830,31 @@
                             >
                                 Trending (YoY)
                             </div>
+                            <div style={{padding:'8px 20px',fontSize:'11px',color:'#6e7681',textTransform:'uppercase',letterSpacing:'0.5px',marginTop:'8px'}}>Team Management</div>
+                            <div
+                                className={`nav-item ${currentPage === 'closings' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('closings')}
+                            >
+                                Closings
+                            </div>
+                            <div
+                                className={`nav-item ${currentPage === 'activity' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('activity')}
+                            >
+                                Activity
+                            </div>
+                            <div
+                                className={`nav-item ${currentPage === 'scorecards' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('scorecards')}
+                            >
+                                Scorecards
+                            </div>
+                            <div
+                                className={`nav-item ${currentPage === 'coaching' ? 'active' : ''}`}
+                                onClick={() => setCurrentPage('coaching')}
+                            >
+                                Coaching
+                            </div>
                         </div>
                         <div className="sidebar-footer">
                             <p style={{ fontSize: '12px', marginBottom: '8px' }}>Logged in as:</p>
@@ -797,6 +866,10 @@
                         {currentPage === 'dashboard' && <DashboardPage />}
                         {currentPage === 'deals' && <DealsPage />}
                         {currentPage === 'trending' && <TrendingPage />}
+                        {currentPage === 'closings' && <ClosingsPage />}
+                        {currentPage === 'activity' && <ActivityPage />}
+                        {currentPage === 'scorecards' && <ScorecardsPage />}
+                        {currentPage === 'coaching' && <CoachingPage />}
                     </div>
                 </div>
             );
@@ -1511,7 +1584,7 @@
 
                         {/* Detailed Year Table */}
                         <div className="trending-card" style={{padding:'16px',overflowX:'auto'}}>
-                            <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>{selectedAgent === 'Team' ? 'Team' : selectedAgent} â Year Detail</h4>
+                            <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>{selectedAgent === 'Team' ? 'Team' : selectedAgent} Ã¢ÂÂ Year Detail</h4>
                             <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
                                 <thead>
                                     <tr style={{borderBottom:'1px solid #30363d'}}>
@@ -1554,7 +1627,7 @@
                         {/* Agent Comparison for Current Year */}
                         {selectedAgent === 'Team' && (
                             <div className="trending-card" style={{padding:'16px',marginTop:'16px'}}>
-                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Agent Comparison â {sortedYears[sortedYears.length-1]}</h4>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Agent Comparison Ã¢ÂÂ {sortedYears[sortedYears.length-1]}</h4>
                                 <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
                                     <thead>
                                         <tr style={{borderBottom:'1px solid #30363d'}}>
@@ -1587,6 +1660,614 @@
                 </>
             );
         }
+
+                function ClosingsPage() {
+            const [deals, setDeals] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const coreAgents = ['Addison Corbin','Will Nix','Ron Corbin','Zach Corbin'];
+
+            useEffect(() => { loadDeals(); }, []);
+
+            async function loadDeals() {
+                try {
+                    const { data } = await supabaseClient.from('deals').select('*').order('close_date', { ascending: false });
+                    setDeals(data || []);
+                } catch(e) { console.error(e); }
+                setLoading(false);
+            }
+
+            const currentYear = new Date().getFullYear();
+            const thisYearDeals = deals.filter(d => {
+                const y = d.close_date ? new Date(d.close_date).getFullYear() : null;
+                return y === currentYear;
+            });
+
+            const statusGroups = { 'Active': [], 'Under Contract': [], 'Closed': [], 'Withdrawn/Expired': [] };
+            thisYearDeals.forEach(d => {
+                const s = (d.status || '').toLowerCase();
+                if (s.includes('close') || s.includes('sold')) statusGroups['Closed'].push(d);
+                else if (s.includes('contract') || s.includes('pending')) statusGroups['Under Contract'].push(d);
+                else if (s.includes('withdraw') || s.includes('expir') || s.includes('cancel')) statusGroups['Withdrawn/Expired'].push(d);
+                else statusGroups['Active'].push(d);
+            });
+
+            const agentStats = {};
+            coreAgents.forEach(a => { agentStats[a] = { total: 0, closed: 0, volume: 0, gci: 0 }; });
+            thisYearDeals.forEach(d => {
+                const agent = d.agent_name || 'Unknown';
+                if (agentStats[agent]) {
+                    agentStats[agent].total++;
+                    const s = (d.status || '').toLowerCase();
+                    if (s.includes('close') || s.includes('sold')) {
+                        agentStats[agent].closed++;
+                        agentStats[agent].volume += (d.sale_price || 0);
+                        agentStats[agent].gci += (d.gci || 0);
+                    }
+                }
+            });
+
+            if (loading) return <div className="content"><p>Loading closings...</p></div>;
+
+            return (
+                <>
+                    <div className="header"><h2>Closings Tracker - {currentYear}</h2></div>
+                    <div className="content">
+                        <div className="pipeline-stage">
+                            <div className="stage-card">
+                                <div className="count stage-active">{statusGroups['Active'].length}</div>
+                                <div className="label">Active Listings</div>
+                            </div>
+                            <div className="stage-card">
+                                <div className="count stage-pending">{statusGroups['Under Contract'].length}</div>
+                                <div className="label">Under Contract</div>
+                            </div>
+                            <div className="stage-card">
+                                <div className="count stage-closed">{statusGroups['Closed'].length}</div>
+                                <div className="label">Closed</div>
+                            </div>
+                            <div className="stage-card">
+                                <div className="count stage-lost">{statusGroups['Withdrawn/Expired'].length}</div>
+                                <div className="label">Withdrawn/Expired</div>
+                            </div>
+                        </div>
+
+                        <div className="table-container">
+                            <div className="table-header"><h3>Agent Closing Summary</h3></div>
+                            <div className="table-scrollable">
+                                <table>
+                                    <thead><tr><th>Agent</th><th>Total Deals</th><th>Closed</th><th>Close Rate</th><th>Closed Volume</th><th>GCI</th></tr></thead>
+                                    <tbody>
+                                        {coreAgents.map(a => {
+                                            const s = agentStats[a];
+                                            const rate = s.total > 0 ? ((s.closed/s.total)*100).toFixed(0) + '%' : '--';
+                                            return (
+                                                <tr key={a}>
+                                                    <td style={{color:'#58a6ff',fontWeight:600}}>{a}</td>
+                                                    <td>{s.total}</td>
+                                                    <td style={{color:'#3fb950'}}>{s.closed}</td>
+                                                    <td>{rate}</td>
+                                                    <td>${(s.volume/1000000).toFixed(2)}M</td>
+                                                    <td>${(s.gci/1000).toFixed(1)}K</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="table-container" style={{marginTop:'16px'}}>
+                            <div className="table-header"><h3>Recent Closings</h3></div>
+                            <div className="table-scrollable">
+                                <table>
+                                    <thead><tr><th>Date</th><th>Address</th><th>Agent</th><th>Price</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        {thisYearDeals.slice(0, 25).map((d, i) => (
+                                            <tr key={i}>
+                                                <td>{d.close_date || '--'}</td>
+                                                <td>{d.address || '--'}</td>
+                                                <td>{d.agent_name || '--'}</td>
+                                                <td>${((d.sale_price||0)/1000).toFixed(0)}K</td>
+                                                <td><span className={'badge ' + ((d.status||'').toLowerCase().includes('close') ? 'badge-done' : 'badge-in-progress')}>{d.status || 'Active'}</span></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        // ==================== ACTIVITY PAGE (FUB) ====================
+        function ActivityPage() {
+            const [fubKey, setFubKey] = useState(localStorage.getItem('fub_api_key') || '');
+            const [keyInput, setKeyInput] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [stats, setStats] = useState(null);
+            const [dateRange, setDateRange] = useState('month');
+            const [error, setError] = useState('');
+
+            useEffect(() => { if (fubKey) fetchCallData(); }, [fubKey, dateRange]);
+
+            function getDateFilter() {
+                const now = new Date();
+                if (dateRange === 'week') {
+                    const d = new Date(now); d.setDate(d.getDate() - 7);
+                    return d.toISOString().split('T')[0];
+                } else if (dateRange === 'month') {
+                    return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-01';
+                } else {
+                    return now.getFullYear() + '-01-01';
+                }
+            }
+
+            async function fetchCallData() {
+                setLoading(true);
+                setError('');
+                try {
+                    const encoded = btoa(fubKey + ':');
+                    const headers = { 'Authorization': 'Basic ' + encoded };
+                    const dateFilter = getDateFilter();
+                    const result = { total: 0, connected: 0, noAnswer: 0, outbound: 0, inbound: 0, totalDuration: 0, agents: {}, pages: 0 };
+
+                    let url = 'https://api.followupboss.com/v1/calls?limit=100&createdAfter=' + dateFilter;
+                    while (url && result.pages < 50) {
+                        const resp = await fetch(url, { headers });
+                        if (!resp.ok) throw new Error('FUB API error: ' + resp.status);
+                        const data = await resp.json();
+                        const calls = data.calls || [];
+                        result.pages++;
+                        result.total += calls.length;
+
+                        calls.forEach(c => {
+                            const connected = c.outcome === null || c.outcome === 'Connected';
+                            if (connected) result.connected++; else result.noAnswer++;
+                            if (c.isIncoming) result.inbound++; else result.outbound++;
+                            result.totalDuration += (c.duration || 0);
+                            const agent = c.userName || 'Unknown';
+                            if (!result.agents[agent]) result.agents[agent] = { total: 0, connected: 0, noAnswer: 0, outbound: 0, duration: 0 };
+                            result.agents[agent].total++;
+                            if (connected) result.agents[agent].connected++;
+                            else result.agents[agent].noAnswer++;
+                            if (!c.isIncoming) result.agents[agent].outbound++;
+                            result.agents[agent].duration += (c.duration || 0);
+                        });
+                        url = data._metadata?.nextLink || null;
+                    }
+                    setStats(result);
+                } catch(e) {
+                    setError(e.message);
+                    if (e.message.includes('401') || e.message.includes('403')) {
+                        localStorage.removeItem('fub_api_key');
+                        setFubKey('');
+                    }
+                }
+                setLoading(false);
+            }
+
+            function saveKey() {
+                if (keyInput.trim()) {
+                    localStorage.setItem('fub_api_key', keyInput.trim());
+                    setFubKey(keyInput.trim());
+                }
+            }
+
+            function formatMin(sec) { return (sec / 60).toFixed(0) + ' min'; }
+
+            if (!fubKey) {
+                return (
+                    <>
+                        <div className="header"><h2>Activity - Call Ratios</h2></div>
+                        <div className="content">
+                            <div className="fub-prompt">
+                                <h3 style={{marginBottom:'8px'}}>Connect Follow Up Boss</h3>
+                                <p style={{color:'#8b949e',marginBottom:'12px'}}>Enter your FUB API key to pull call data. Find it at Admin &rarr; API in Follow Up Boss.</p>
+                                <div className="form-group" style={{maxWidth:'400px',margin:'0 auto'}}>
+                                    <input type="text" value={keyInput} onChange={e => setKeyInput(e.target.value)} placeholder="fka_XXXX..." />
+                                </div>
+                                <button className="btn-primary" style={{width:'auto',padding:'8px 24px'}} onClick={saveKey}>Connect</button>
+                            </div>
+                        </div>
+                    </>
+                );
+            }
+
+            return (
+                <>
+                    <div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                        <h2>Activity - Call Ratios</h2>
+                        <div style={{display:'flex',gap:'8px'}}>
+                            {['week','month','year'].map(r => (
+                                <button key={r} onClick={() => setDateRange(r)}
+                                    style={{padding:'4px 12px',borderRadius:'6px',border:'1px solid '+(dateRange===r?'#58a6ff':'#30363d'),
+                                    background:dateRange===r?'#58a6ff':'#21262d',color:dateRange===r?'#fff':'#c9d1d9',
+                                    cursor:'pointer',fontSize:'12px',textTransform:'capitalize'}}>{r}</button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="content">
+                        {loading && <p>Loading call data from FUB...</p>}
+                        {error && <div className="error-message">{error}</div>}
+                        {stats && (
+                            <>
+                                <div className="activity-summary">
+                                    <div className="activity-card"><div className="val">{stats.total}</div><label>Total Calls</label></div>
+                                    <div className="activity-card"><div className="val" style={{color:'#3fb950'}}>{stats.connected}</div><label>Connected</label></div>
+                                    <div className="activity-card"><div className="val" style={{color:'#f85149'}}>{stats.noAnswer}</div><label>No Answer</label></div>
+                                    <div className="activity-card"><div className="val">{stats.total > 0 ? ((stats.connected/stats.total)*100).toFixed(0) + '%' : '--'}</div><label>Connect Rate</label></div>
+                                    <div className="activity-card"><div className="val">{stats.outbound}</div><label>Outbound</label></div>
+                                    <div className="activity-card"><div className="val">{formatMin(stats.totalDuration)}</div><label>Talk Time</label></div>
+                                </div>
+
+                                <div className="table-container">
+                                    <div className="table-header"><h3>By Agent</h3></div>
+                                    <div className="table-scrollable">
+                                        <table>
+                                            <thead><tr><th>Agent</th><th>Total</th><th>Connected</th><th>No Answer</th><th>Connect Rate</th><th>Outbound</th><th>Talk Time</th></tr></thead>
+                                            <tbody>
+                                                {Object.entries(stats.agents).sort((a,b) => b[1].total - a[1].total).map(([name, s]) => (
+                                                    <tr key={name}>
+                                                        <td style={{color:'#58a6ff',fontWeight:600}}>{name}</td>
+                                                        <td>{s.total}</td>
+                                                        <td style={{color:'#3fb950'}}>{s.connected}</td>
+                                                        <td style={{color:'#f85149'}}>{s.noAnswer}</td>
+                                                        <td>{s.total > 0 ? ((s.connected/s.total)*100).toFixed(0)+'%' : '--'}</td>
+                                                        <td>{s.outbound}</td>
+                                                        <td>{formatMin(s.duration)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </>
+            );
+        }
+
+        // ==================== SCORECARDS PAGE ====================
+        function ScorecardsPage() {
+            const [deals, setDeals] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const coreAgents = ['Addison Corbin','Will Nix','Ron Corbin','Zach Corbin'];
+
+            useEffect(() => { loadData(); }, []);
+
+            async function loadData() {
+                try {
+                    const { data } = await supabaseClient.from('deals').select('*');
+                    setDeals(data || []);
+                } catch(e) { console.error(e); }
+                setLoading(false);
+            }
+
+            const currentYear = new Date().getFullYear();
+
+            function agentData(agent) {
+                const allDeals = deals.filter(d => d.agent_name === agent);
+                const ytd = allDeals.filter(d => d.close_date && new Date(d.close_date).getFullYear() === currentYear);
+                const prevYear = allDeals.filter(d => d.close_date && new Date(d.close_date).getFullYear() === currentYear - 1);
+                const vol = ytd.reduce((s,d) => s + (d.sale_price || 0), 0);
+                const gci = ytd.reduce((s,d) => s + (d.gci || 0), 0);
+                const prevVol = prevYear.reduce((s,d) => s + (d.sale_price || 0), 0);
+                const avgPrice = ytd.length > 0 ? vol / ytd.length : 0;
+                return { deals: ytd.length, volume: vol, gci, avgPrice, prevDeals: prevYear.length, prevVol, totalCareer: allDeals.length };
+            }
+
+            const scorecards = coreAgents.map(a => ({ name: a, ...agentData(a) }));
+            scorecards.sort((a,b) => b.volume - a.volume);
+
+            if (loading) return <div className="content"><p>Loading scorecards...</p></div>;
+
+            return (
+                <>
+                    <div className="header"><h2>Agent Scorecards - {currentYear}</h2></div>
+                    <div className="content">
+                        <div className="scorecard-grid">
+                            {scorecards.map((sc, i) => {
+                                const volChange = sc.prevVol > 0 ? (((sc.volume - sc.prevVol) / sc.prevVol) * 100).toFixed(0) : '--';
+                                const dealChange = sc.prevDeals > 0 ? (((sc.deals - sc.prevDeals) / sc.prevDeals) * 100).toFixed(0) : '--';
+                                return (
+                                    <div className="scorecard" key={sc.name}>
+                                        <div className="scorecard-header">
+                                            <h3>{sc.name}</h3>
+                                            <div className="scorecard-rank">#{i+1}</div>
+                                        </div>
+                                        <div className="scorecard-stats">
+                                            <div className="scorecard-stat">
+                                                <label>YTD Volume</label>
+                                                <div className="val">${(sc.volume/1000000).toFixed(2)}M</div>
+                                            </div>
+                                            <div className="scorecard-stat">
+                                                <label>YTD Deals</label>
+                                                <div className="val">{sc.deals}</div>
+                                            </div>
+                                            <div className="scorecard-stat">
+                                                <label>GCI</label>
+                                                <div className="val">${(sc.gci/1000).toFixed(1)}K</div>
+                                            </div>
+                                            <div className="scorecard-stat">
+                                                <label>Avg Price</label>
+                                                <div className="val">${(sc.avgPrice/1000).toFixed(0)}K</div>
+                                            </div>
+                                            <div className="scorecard-stat">
+                                                <label>Vol vs {currentYear-1}</label>
+                                                <div className="val" style={{color: volChange !== '--' && parseInt(volChange) >= 0 ? '#3fb950' : '#f85149'}}>{volChange}%</div>
+                                            </div>
+                                            <div className="scorecard-stat">
+                                                <label>Deals vs {currentYear-1}</label>
+                                                <div className="val" style={{color: dealChange !== '--' && parseInt(dealChange) >= 0 ? '#3fb950' : '#f85149'}}>{dealChange}%</div>
+                                            </div>
+                                        </div>
+                                        <div style={{marginTop:'12px',fontSize:'12px',color:'#6e7681'}}>Career total: {sc.totalCareer} deals</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="table-container" style={{marginTop:'20px'}}>
+                            <div className="table-header"><h3>Leaderboard</h3></div>
+                            <div className="table-scrollable">
+                                <table>
+                                    <thead><tr><th>Rank</th><th>Agent</th><th>Volume</th><th>Deals</th><th>GCI</th><th>Avg Price</th></tr></thead>
+                                    <tbody>
+                                        {scorecards.map((sc, i) => (
+                                            <tr key={sc.name}>
+                                                <td style={{fontWeight:700,color:i===0?'#d29922':i===1?'#8b949e':i===2?'#da7b3a':'#6e7681'}}>#{i+1}</td>
+                                                <td style={{color:'#58a6ff',fontWeight:600}}>{sc.name}</td>
+                                                <td>${(sc.volume/1000000).toFixed(2)}M</td>
+                                                <td>{sc.deals}</td>
+                                                <td>${(sc.gci/1000).toFixed(1)}K</td>
+                                                <td>${(sc.avgPrice/1000).toFixed(0)}K</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        // ==================== COACHING PAGE ====================
+        function CoachingPage() {
+            const coreAgents = ['Addison Corbin','Will Nix','Ron Corbin','Zach Corbin'];
+            const [tasks, setTasks] = useState([]);
+            const [notes, setNotes] = useState([]);
+            const [selectedAgent, setSelectedAgent] = useState('All');
+            const [tab, setTab] = useState('tasks');
+            const [showAddTask, setShowAddTask] = useState(false);
+            const [showAddNote, setShowAddNote] = useState(false);
+            const [newTask, setNewTask] = useState({ agent_name: '', title: '', description: '', priority: 'medium', due_date: '', status: 'todo' });
+            const [newNote, setNewNote] = useState({ agent_name: '', note: '' });
+            const [loading, setLoading] = useState(true);
+            const [dbReady, setDbReady] = useState(true);
+
+            useEffect(() => { loadAll(); }, []);
+
+            async function loadAll() {
+                try {
+                    const { data: t, error: te } = await supabaseClient.from('coaching_tasks').select('*').order('created_at', { ascending: false });
+                    if (te) { if (te.code === '42P01') { setDbReady(false); setLoading(false); return; } throw te; }
+                    setTasks(t || []);
+                    const { data: n } = await supabaseClient.from('coaching_notes').select('*').order('created_at', { ascending: false });
+                    setNotes(n || []);
+                } catch(e) { console.error(e); setDbReady(false); }
+                setLoading(false);
+            }
+
+            async function addTask() {
+                if (!newTask.title || !newTask.agent_name) return;
+                const { error } = await supabaseClient.from('coaching_tasks').insert([newTask]);
+                if (!error) { setShowAddTask(false); setNewTask({ agent_name: '', title: '', description: '', priority: 'medium', due_date: '', status: 'todo' }); loadAll(); }
+            }
+
+            async function addNote() {
+                if (!newNote.note || !newNote.agent_name) return;
+                const { error } = await supabaseClient.from('coaching_notes').insert([newNote]);
+                if (!error) { setShowAddNote(false); setNewNote({ agent_name: '', note: '' }); loadAll(); }
+            }
+
+            async function updateTaskStatus(id, status) {
+                await supabaseClient.from('coaching_tasks').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+                loadAll();
+            }
+
+            async function deleteTask(id) {
+                await supabaseClient.from('coaching_tasks').delete().eq('id', id);
+                loadAll();
+            }
+
+            const filteredTasks = selectedAgent === 'All' ? tasks : tasks.filter(t => t.agent_name === selectedAgent);
+            const filteredNotes = selectedAgent === 'All' ? notes : notes.filter(n => n.agent_name === selectedAgent);
+            const todoCols = { 'todo': filteredTasks.filter(t => t.status === 'todo'), 'in_progress': filteredTasks.filter(t => t.status === 'in_progress'), 'done': filteredTasks.filter(t => t.status === 'done') };
+
+            if (loading) return <div className="content"><p>Loading coaching data...</p></div>;
+
+            if (!dbReady) return (
+                <>
+                    <div className="header"><h2>Coaching</h2></div>
+                    <div className="content">
+                        <div className="fub-prompt">
+                            <h3>Set Up Coaching Tables</h3>
+                            <p style={{color:'#8b949e',margin:'12px 0'}}>The coaching tables haven't been created yet. Run this SQL in your Supabase SQL Editor:</p>
+                            <pre style={{background:'#0d1117',padding:'16px',borderRadius:'6px',textAlign:'left',fontSize:'12px',overflow:'auto',maxWidth:'600px',margin:'0 auto'}}>
+{`CREATE TABLE coaching_tasks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  agent_name text NOT NULL,
+  title text NOT NULL,
+  description text DEFAULT '',
+  status text DEFAULT 'todo',
+  priority text DEFAULT 'medium',
+  due_date date,
+  created_by text DEFAULT '',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE coaching_notes (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  agent_name text NOT NULL,
+  note text NOT NULL,
+  created_by text DEFAULT '',
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE coaching_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE coaching_notes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "auth_all" ON coaching_tasks FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all" ON coaching_notes FOR ALL TO authenticated USING (true) WITH CHECK (true);`}
+                            </pre>
+                            <button className="btn-primary" style={{marginTop:'16px',width:'auto',padding:'8px 24px'}} onClick={loadAll}>I've created the tables - Retry</button>
+                        </div>
+                    </div>
+                </>
+            );
+
+            return (
+                <>
+                    <div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                        <h2>Coaching</h2>
+                        <div style={{display:'flex',gap:'8px'}}>
+                            <button className="btn-primary" style={{width:'auto',padding:'6px 16px',fontSize:'13px'}} onClick={() => setShowAddTask(true)}>+ Task</button>
+                            <button className="btn-secondary" style={{width:'auto',padding:'6px 16px',fontSize:'13px'}} onClick={() => setShowAddNote(true)}>+ Note</button>
+                        </div>
+                    </div>
+                    <div className="content">
+                        <div style={{marginBottom:'16px',display:'flex',gap:'8px',flexWrap:'wrap'}}>
+                            {['All', ...coreAgents].map(a => (
+                                <button key={a} onClick={() => setSelectedAgent(a)}
+                                    style={{padding:'4px 14px',borderRadius:'6px',border:'1px solid '+(selectedAgent===a?'#58a6ff':'#30363d'),
+                                    background:selectedAgent===a?'#58a6ff':'#21262d',color:selectedAgent===a?'#fff':'#c9d1d9',cursor:'pointer',fontSize:'12px'}}>
+                                    {a}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="tab-bar">
+                            <button className={'tab-btn '+(tab==='tasks'?'active':'')} onClick={() => setTab('tasks')}>Task Board ({filteredTasks.length})</button>
+                            <button className={'tab-btn '+(tab==='notes'?'active':'')} onClick={() => setTab('notes')}>Notes ({filteredNotes.length})</button>
+                        </div>
+
+                        {tab === 'tasks' && (
+                            <div className="kanban-board">
+                                {[['todo','To Do','#8b949e'],['in_progress','In Progress','#58a6ff'],['done','Done','#3fb950']].map(([key, label, color]) => (
+                                    <div className="kanban-col" key={key}>
+                                        <div className="kanban-col-header" style={{color}}>
+                                            {label}
+                                            <span className={'badge badge-' + key}>{todoCols[key].length}</span>
+                                        </div>
+                                        <div className="kanban-col-body">
+                                            {todoCols[key].map(t => (
+                                                <div className="kanban-card" key={t.id}>
+                                                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'start'}}>
+                                                        <h4>{t.title}</h4>
+                                                        <span className={'badge badge-' + t.priority} style={{flexShrink:0}}>{t.priority}</span>
+                                                    </div>
+                                                    <p>{t.agent_name}</p>
+                                                    {t.description && <p style={{marginTop:'4px'}}>{t.description}</p>}
+                                                    {t.due_date && <p style={{marginTop:'4px',color:'#d29922'}}>Due: {t.due_date}</p>}
+                                                    <div style={{marginTop:'8px',display:'flex',gap:'4px'}}>
+                                                        {key !== 'todo' && <button onClick={() => updateTaskStatus(t.id, key === 'done' ? 'in_progress' : 'todo')} style={{fontSize:'11px',padding:'2px 8px',border:'1px solid #30363d',borderRadius:'4px',background:'#21262d',color:'#c9d1d9',cursor:'pointer'}}>&larr;</button>}
+                                                        {key !== 'done' && <button onClick={() => updateTaskStatus(t.id, key === 'todo' ? 'in_progress' : 'done')} style={{fontSize:'11px',padding:'2px 8px',border:'1px solid #30363d',borderRadius:'4px',background:'#21262d',color:'#c9d1d9',cursor:'pointer'}}>&rarr;</button>}
+                                                        <button onClick={() => deleteTask(t.id)} style={{fontSize:'11px',padding:'2px 8px',border:'1px solid #f8514933',borderRadius:'4px',background:'transparent',color:'#f85149',cursor:'pointer',marginLeft:'auto'}}>x</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {tab === 'notes' && (
+                            <div>
+                                {filteredNotes.length === 0 && <p style={{color:'#6e7681',textAlign:'center',padding:'40px'}}>No coaching notes yet. Click + Note to add one.</p>}
+                                {filteredNotes.map(n => (
+                                    <div className="note-card" key={n.id}>
+                                        <div style={{display:'flex',justifyContent:'space-between'}}>
+                                            <span style={{color:'#58a6ff',fontWeight:600,fontSize:'13px'}}>{n.agent_name}</span>
+                                        </div>
+                                        <p style={{marginTop:'6px',fontSize:'13px',color:'#e6edf3',whiteSpace:'pre-wrap'}}>{n.note}</p>
+                                        <div className="meta">{new Date(n.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {showAddTask && (
+                        <div className="modal-overlay" onClick={() => setShowAddTask(false)}>
+                            <div className="modal" onClick={e => e.stopPropagation()}>
+                                <h2>New Coaching Task</h2>
+                                <div className="form-group">
+                                    <label>Agent</label>
+                                    <select value={newTask.agent_name} onChange={e => setNewTask({...newTask, agent_name: e.target.value})}>
+                                        <option value="">Select agent...</option>
+                                        {coreAgents.map(a => <option key={a} value={a}>{a}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Task</label>
+                                    <input value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} placeholder="e.g. Follow up with 5 leads this week" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Details</label>
+                                    <textarea rows={3} value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} placeholder="Optional notes..." />
+                                </div>
+                                <div style={{display:'flex',gap:'12px'}}>
+                                    <div className="form-group" style={{flex:1}}>
+                                        <label>Priority</label>
+                                        <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value})}>
+                                            <option value="low">Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group" style={{flex:1}}>
+                                        <label>Due Date</label>
+                                        <input type="date" value={newTask.due_date} onChange={e => setNewTask({...newTask, due_date: e.target.value})} />
+                                    </div>
+                                </div>
+                                <div className="modal-buttons">
+                                    <button className="btn-secondary" onClick={() => setShowAddTask(false)}>Cancel</button>
+                                    <button className="btn-primary" onClick={addTask}>Create Task</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showAddNote && (
+                        <div className="modal-overlay" onClick={() => setShowAddNote(false)}>
+                            <div className="modal" onClick={e => e.stopPropagation()}>
+                                <h2>New Coaching Note</h2>
+                                <div className="form-group">
+                                    <label>Agent</label>
+                                    <select value={newNote.agent_name} onChange={e => setNewNote({...newNote, agent_name: e.target.value})}>
+                                        <option value="">Select agent...</option>
+                                        {coreAgents.map(a => <option key={a} value={a}>{a}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Note</label>
+                                    <textarea rows={5} value={newNote.note} onChange={e => setNewNote({...newNote, note: e.target.value})} placeholder="Coaching observations, action items, feedback..." />
+                                </div>
+                                <div className="modal-buttons">
+                                    <button className="btn-secondary" onClick={() => setShowAddNote(false)}>Cancel</button>
+                                    <button className="btn-primary" onClick={addNote}>Save Note</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
 
         // Render the app
         const root = ReactDOM.createRoot(document.getElementById('root'));
