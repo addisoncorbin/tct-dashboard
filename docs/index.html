@@ -1374,7 +1374,7 @@
         }
 
         // Trending Page
-                function TrendingPage() {
+                        function TrendingPage() {
             const [trendingData, setTrendingData] = useState(null);
             const [loading, setLoading] = useState(true);
             const [selectedAgent, setSelectedAgent] = useState('Team');
@@ -1472,34 +1472,6 @@
                                 </div>
                             </div>
                             {/* Deals Bar Chart */}
-                            <div classNameelectedAgent===a?'#58a6ff':'#30363d'),
-                                    background:selectedAgent===a?'#58a6ff':'#21262d',color:selectedAgent===a?'#fff':'#c9d1d9',
-                                    cursor:'pointer',fontSize:'13px',fontWeight:selectedAgent===a?'600':'400'}}>
-                                    {a}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'16px',marginBottom:'24px'}}>
-                            {/* Volume Bar Chart */}
-                            <div className="trending-card" style={{padding:'16px'}}>
-                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Volume by Year</h4>
-                                <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
-                                    {sortedYears.map((y,i) => {
-                                        const d = getDataForView(y);
-                                        return (
-                                            <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                                                <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
-                                                <div style={{flex:1,background:'#161b22',borderRadius:'4px',height:'20px',position:'relative'}}>
-                                                    <div style={{width:`${(d.volume/maxVol)*100}%`,height:'100%',background:barColors[i%barColors.length],borderRadius:'4px',transition:'width 0.5s'}}></div>
-                                                </div>
-                                                <span style={{width:'60px',fontSize:'11px',color:'#c9d1d9',textAlign:'right'}}>{formatM(d.volume)}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            {/* Deals Bar Chart */}
                             <div className="trending-card" style={{padding:'16px'}}>
                                 <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Deals by Year</h4>
                                 <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
@@ -1526,10 +1498,84 @@
                                         return (
                                             <div key={y} style={{display:'flex',alignItems:'center',gap:'8px'}}>
                                                 <span style={{width:'32px',fontSize:'11px',color:'#8b949e',textAlign:'right'}}>{y}</span>
-                         ]Ý[O^ÞÙ^KXÚÙÜÝ[ÈÌMXËÜ\Y]\ÎÍ	ËZYÚÌ	ËÜÚ][ÛÜ[]]Iß_O]Ý[O^ÞÝÚY	ÊØÚKÛX^ÐÒJJLIXZYÚÌL	IËXÚÙÜÝ[\ÛÛÜÖÊJÍ
-IX\ÛÛÜË[ÝKÜ\Y]\ÎÍ	Ë[Ú][ÛÝÚY\Éß_OÙ]Ù]Ü[Ý[O^ÞÝÚYÍL	ËÛÚ^NÌL\	ËÛÛÜÈØÎYYIË^[YÛÜYÚ	ß_OÙÜX]ÊØÚJ_OÜÜ[Ù]
-NÂJ_BÙ]Ù]Ù]ËÊ]Z[YYX\XH
-ßB]Û\ÜÓ[YOH[[ËXØ\Ý[O^ÞÜY[ÎÌM	ËÝ\ÝÖØ]]Éß_OÝ[O^ÞÛX\Ú[ÌL	ËÛÛÜÈØÎYYIËÛÚ^NÌM	ß_OÜÙ[XÝYYÙ[OOH	ÕX[IÈÈ	ÕX[IÈÙ[XÝYYÙ[H8 %YX\]Z[ÚXHÝ[O^ÞÝÚYÌL	IËÜ\ÛÛ\ÙNØÛÛ\ÙIËÛÚ^NÌLÜ	ß_O¢ÇFVCà¢ÇG"7GÆS×·¶&÷&FW$&÷GFöÓ¢s6öÆB333c6Bw×Óà¢ÇF7GÆS×··FWDÆvã¢vÆVgBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåV#Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåföÇVÖSÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓäFVÇ3Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×Óät4Â÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×ÓåõÂ÷Fà¢ÇF7GÆS×··FWDÆvã¢w&vBrÇFFæs¢srÆ6öÆ÷#¢r3#CRw×Óäfr&6SÂ÷Fà¢Â÷G#à¢Â÷FVCà¢ÇF&öGà¢·6÷'FVEV'2æÖÂGÓâ°¢6öç7BBÒvWDFFf÷%fWr°¢6öç7B&WbÒGâòvWDFFf÷%fWr6÷'FVEV'5¶GÓÒ¢çVÆÃ°¢6öç7BföÄ6rÒ&Wbò7D6ævR&WbçföÇVÖRÂBçföÇVÖR¢rÒÒs°¢ ½¹ÍÐ±¡ôÁÉØüÁÑ¡¹¡ÁÉØ¹±Ì°¹±Ì¤è´´ì(½¹ÍÐ¥¡ôÁÉØüÁÑ¡¹¡ÁÉØ¹¤°¹¤¤è´´ì(½¹ÍÐÙAÉ¥ô¹±ÌøÀü½ÉµÑ4¡¹Ù½±Õµ¼¹±Ì¤è´´ì(½¹ÍÐ¡½±½Èô¡Ø¤ôøØôôô´´üáäÐåè¡Ø¹ÍÑÉÑÍ]¥Ñ  ´¤üàÔÄÐäèÍäÔÀ¤ì(ÉÑÕÉ¸ (ñÑÈ­äõíåôÍÑå±õíí½ÉÉ	½ÑÑ½´èÅÁàÍ½±¥ÈÄÈØÉõôø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±½¹Ñ]¥¡ÐèØÀÀõôùíåôð½Ñø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±ÑáÑ±¥¸èÉ¥¡Ðõôùí½ÉµÑ4¡¸åõôùY½±Õµð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôù±Ìð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôù$ð½Ñ ø(ñÑ ÍÑå±õííÑáÑ±¥¸èÉ¥¡Ð±Á¥¹èáÁà±½±½ÈèáäÐåõôùÙAÉ¥ð½Ñ ø(ð½ÑÈø(ð½Ñ¡ø(ñÑ½äø(í½É¹ÑÌ¹µÀ¡¹Ðôøì(½¹ÍÐ±ÑÍÑeÈôÍ½ÉÑeÉÍmÍ½ÉÑeÉÌ¹±¹Ñ ´Åtì(½¹ÍÐô¡åÉÍm±ÑÍÑeÉtåÉÍm±ÑÍÑeÉt¹¹ÑÍm¹Ñt¤ñðíÙ½±ÕµèÀ±±ÌèÀ±¤èÁôì(ÉÑÕÉ¸ (ñÑÈ­äõí¹ÑôÍÑå±õíí½ÉÉ	½ÑÑ½´èÅÁàÍ½±¥ÈÄÈØÉ±ÕÉÍ½ÈèÁ½¥¹ÑÈõô½¹±¥¬õì ¤ôøÍÑM±Ñ¹Ð¡¹Ð¥ôø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèÔáÙ±½¹Ñ]¥¡ÐèØÀÀõôùí¹Ñôð½Ñø(ñÑÍÑå±õííÁ¥¹èáÁà±½±½ÈèåÅä±ÑáÑ±¥¸èÉ¥¡Ðõôùí½ÉµÑ4¡¹Ù½±Õµ¥ôð½Ñø(8b949e',textAlign:'right'}}>{ad.deals > 0 ? formatM(ad.volume/ad.deals) : '--'}</td>
+                                                <div style={{flex:1,background:'#161b22',borderRadius:'4px',height:'20px',position:'relative'}}>
+                                                    <div style={{width:`${(d.gci/maxGCI)*100}%`,height:'100%',background:barColors[(i+4)%barColors.length],borderRadius:'4px',transition:'width 0.5s'}}></div>
+                                                </div>
+                                                <span style={{width:'52px',fontSize:'11px',color:'#c9d1d9',textAlign:'right'}}>{formatK(d.gci)}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Detailed Year Table */}
+                        <div className="trending-card" style={{padding:'16px',overflowX:'auto'}}>
+                            <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>{selectedAgent === 'Team' ? 'Team' : selectedAgent} â Year Detail</h4>
+                            <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+                                <thead>
+                                    <tr style={{borderBottom:'1px solid #30363d'}}>
+                                        <th style={{textAlign:'left',padding:'8px',color:'#8b949e'}}>Year</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Volume</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>YoY</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Deals</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>YoY</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>GCI</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>YoY</th>
+                                        <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Avg Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedYears.map((y, idx) => {
+                                        const d = getDataForView(y);
+                                        const prev = idx > 0 ? getDataForView(sortedYears[idx-1]) : null;
+                                        const volChg = prev ? pctChange(prev.volume, d.volume) : '--';
+                                        const dealChg = prev ? pctChange(prev.deals, d.deals) : '--';
+                                        const gciChg = prev ? pctChange(prev.gci, d.gci) : '--';
+                                        const avgPrice = d.deals > 0 ? formatM(d.volume / d.deals) : '--';
+                                        const chgColor = (v) => v === '--' ? '#8b949e' : (v.startsWith('-') ? '#f85149' : '#3fb950');
+                                        return (
+                                            <tr key={y} style={{borderBottom:'1px solid #21262d'}}>
+                                                <td style={{padding:'8px',color:'#c9d1d9',fontWeight:'600'}}>{y}</td>
+                                                <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{formatM(d.volume)}</td>
+                                                <td style={{padding:'8px',textAlign:'right',color:chgColor(volChg)}}>{volChg}</td>
+                                                <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{d.deals}</td>
+                                                <td style={{padding:'8px',textAlign:'right',color:chgColor(dealChg)}}>{dealChg}</td>
+                                                <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{formatK(d.gci)}</td>
+                                                <td style={{padding:'8px',textAlign:'right',color:chgColor(gciChg)}}>{gciChg}</td>
+                                                <td style={{padding:'8px',color:'#8b949e',textAlign:'right'}}>{avgPrice}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Agent Comparison for Current Year */}
+                        {selectedAgent === 'Team' && (
+                            <div className="trending-card" style={{padding:'16px',marginTop:'16px'}}>
+                                <h4 style={{margin:'0 0 12px',color:'#c9d1d9',fontSize:'14px'}}>Agent Comparison â {sortedYears[sortedYears.length-1]}</h4>
+                                <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+                                    <thead>
+                                        <tr style={{borderBottom:'1px solid #30363d'}}>
+                                            <th style={{textAlign:'left',padding:'8px',color:'#8b949e'}}>Agent</th>
+                                            <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Volume</th>
+                                            <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Deals</th>
+                                            <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>GCI</th>
+                                            <th style={{textAlign:'right',padding:'8px',color:'#8b949e'}}>Avg Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {coreAgents.map(agent => {
+                                            const latestYear = sortedYears[sortedYears.length-1];
+                                            const ad = (years[latestYear] && years[latestYear].agents[agent]) || {volume:0,deals:0,gci:0};
+                                            return (
+                                                <tr key={agent} style={{borderBottom:'1px solid #21262d',cursor:'pointer'}} onClick={() => setSelectedAgent(agent)}>
+                                                    <td style={{padding:'8px',color:'#58a6ff',fontWeight:'600'}}>{agent}</td>
+                                                    <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{formatM(ad.volume)}</td>
+                                                    <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{ad.deals}</td>
+                                                    <td style={{padding:'8px',color:'#c9d1d9',textAlign:'right'}}>{formatK(ad.gci)}</td>
+                                                    <td style={{padding:'8px',color:'#8b949e',textAlign:'right'}}>{ad.deals > 0 ? formatM(ad.volume/ad.deals) : '--'}</td>
                                                 </tr>
                                             );
                                         })}
