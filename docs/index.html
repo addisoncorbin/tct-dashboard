@@ -1500,7 +1500,83 @@
         setLoading(true);
         try {
           await supabaseCall('POST', 'tasks', {
-            title: formData.title, description:    {task.due_date && <div className="task-card-meta">Due: {task.due_date}</div>}
+            title: formData.title, description: formData.description,
+            assigned_to: formData.assigned_to || null, created_by: 'User',
+            status: formData.status, priority: formData.priority,
+            due_date: formData.due_date || null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+          });
+          setShowModal(false);
+          setFormData({ title: '', description: '', assigned_to: '', priority: 'medium', due_date: '', status: 'todo' });
+          await loadTasks();
+        } catch (error) {
+          alert('Error adding task: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      const handleStatusChange = async (taskId, newStatus) => {
+        try {
+          await supabaseCall('PATCH', 'tasks?id=eq.' + taskId, { status: newStatus });
+          await loadTasks();
+        } catch (error) {
+          alert('Error updating task: ' + error.message);
+        }
+      };
+
+      const handleDeleteTask = async (taskId) => {
+        if (!confirm('Delete this task?')) return;
+        try {
+          await supabaseCall('DELETE', 'tasks?id=eq.' + taskId);
+          await loadTasks();
+        } catch (error) {
+          alert('Error deleting task: ' + error.message);
+        }
+      };
+
+      const todoTasks = filteredTasks.filter(t => t.status === 'todo');
+      const inProgressTasks = filteredTasks.filter(t => t.status === 'in_progress');
+      const doneTasks = filteredTasks.filter(t => t.status === 'done');
+
+      if (loading) return <div className="loading"><div className="spinner"></div> Loading...</div>;
+
+      return (
+        <div>
+          <h2 className="header-title">Tasks</h2>
+          <div className="card">
+            <div className="flex-between" style={{ marginBottom: '20px' }}>
+              <div className="filter-group" style={{ margin: 0 }}>
+                <label>Assigned to:</label>
+                <select value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)} style={{ width: 'auto' }}>
+                  <option>All</option>
+                  {AGENT_NAMES.map(name => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </div>
+              <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Task</button>
+            </div>
+          </div>
+          <div className="kanban-board">
+            <div className="kanban-column">
+              <div className="kanban-column-title">To Do ({todoTasks.length})</div>
+              {todoTasks.map(task => (
+                <div key={task.id} className="task-card">
+                  <div className="task-card-title">{task.title}</div>
+                  {task.assigned_to && <div className="task-card-meta">Assigned: {task.assigned_to}</div>}
+                  {task.due_date && <div className="task-card-meta">Due: {task.due_date}</div>}
+                  <div className="task-card-meta"><PriorityBadge priority={task.priority} /></div>
+                  <div className="task-card-actions">
+                    <button className="btn" onClick={() => handleStatusChange(task.id, 'in_progress')}>→ Progress</button>
+                    <button className="btn btn-danger" onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="kanban-column">
+              <div className="kanban-column-title">In Progress ({inProgressTasks.length})</div>
+              {inProgressTasks.map(task => (
+                <div key={task.id} className="task-card">
+                  <div className="task-card-title">{task.title}</div>
+                  {task.assigned_to && <div className="task-card-meta">Assigned: {task.assigned_to}</div>}
+                  {task.due_date && <div className="task-card-meta">Due: {task.due_date}</div>}
                   <div className="task-card-meta"><PriorityBadge priority={task.priority} /></div>
                   <div className="task-card-actions">
                     <button className="btn" onClick={() => handleStatusChange(task.id, 'todo')}>← To Do</button>
